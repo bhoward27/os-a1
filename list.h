@@ -11,7 +11,8 @@
 
 typedef struct Node_s Node;
 struct Node_s {
-    Node_s* next;
+    Node* next;
+    Node* prev;
     void* item;
 };
 
@@ -20,8 +21,13 @@ enum ListOutOfBounds {
     LIST_OOB_END
 };
 typedef struct List_s List;
-struct List_s{
-    // TODO: You should change this!
+struct List_s {
+    // I'm a bit iffy on this being a pointer since List gets returned as a pointer itself 
+    // from List_create().
+    Node* head;
+    Node* current;
+    Node* tail;
+    int size;
 };
 
 // Maximum number of unique lists the system can support
