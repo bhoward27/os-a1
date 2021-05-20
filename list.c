@@ -16,8 +16,10 @@ List* List_create() {
     List* new_list = malloc(sizeof(List));
     if (new_list == NULL) return NULL;
 
-    new_list->head = new_list->tail = new_list->current = NULL; // The list is empty, so no nodes exist yet--so point "nowhere".
+    // The list is empty, so no nodes exist yet--so point "nowhere".
+    new_list->head = new_list->tail = new_list->current = NULL;
     new_list->size = 0;
+    num_heads++;
     return new_list;
 }
 
@@ -28,4 +30,24 @@ int List_count(List* pList) {
 
 int List_add(List* pList, void* pItem) {
     assert(pList != NULL);
+    // If in C++, I would make these actually const. Might want to move to other part of file.
+    int FAILED = -1;
+    int SUCCEEDED = 0;
+    //  In real code, need to check if there are free nodes available before going further.
+
+    if (pList->size == 0) {
+        //  Somewhere, deal with current node.
+        
+        Node* new_node = malloc(sizeof(Node));
+        if (new_node == NULL) return FAILED;
+        new_node->item = pItem;
+
+        pList->head = new_node;
+        pList->tail = new_node;
+        new_node->next = new_node->prev = NULL;
+
+        pList->size = 1;
+
+        return SUCCEEDED;
+    }
 }
