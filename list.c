@@ -1,8 +1,7 @@
 #include "list.h"
-#include <stdlib.h>
-#include <assert.h>
 
 /*
+    NEED TO UPDATE TO USE THE STACK -- should call the variable node_stack.
     At the moment, the below functions will be implemented in the tradional linked list way 
     (i.e, with malloc)--although this is incorrect for the project, this is done as a temporary step
     to brush up on linked lists and provide as skeleton for the future code.

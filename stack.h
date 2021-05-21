@@ -2,6 +2,8 @@
 #define _STACK_H_
 #include "list.h"
 #include <stddef.h>
+#include <assert.h>
+#include <stdbool.h>
 
 #define STACK_CAPACITY LIST_MAX_NUM_NODES
 typedef Node type;
@@ -12,10 +14,9 @@ struct Stack_s {
     type elems[STACK_CAPACITY];
     type* ptrs[STACK_CAPACITY];
 };
-Stack stack;
 
-Stack* Stack_init();
-bool Stack_push(type*);
-type* Stack_pop();
+bool Stack_init(Stack*);
+bool Stack_push(Stack*, type*);
+type* Stack_pop(Stack*);
 
 #endif
