@@ -14,6 +14,9 @@ struct Stack_s {
     type elems[STACK_CAPACITY];
     type* ptrs[STACK_CAPACITY];
 };
+// I don't like that I'm doing this. It's spaghetti code. But here I am doing it anyway.
+Stack the_node_stack;
+Stack* free_nodes = NULL; // This means the_node_stack hasn't been initialized.
 
 bool Stack_init(Stack*);
 bool Stack_push(Stack*, type*);

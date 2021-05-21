@@ -1,19 +1,15 @@
 #include "list.h"
-
-/*
-    NEED TO UPDATE TO USE THE STACK -- should call the variable node_stack.
-    At the moment, the below functions will be implemented in the tradional linked list way 
-    (i.e, with malloc)--although this is incorrect for the project, this is done as a temporary step
-    to brush up on linked lists and provide as skeleton for the future code.
-*/
-
-static int num_heads = 0;
+#include "stack.h"
 
 List* List_create() {
+    if (free_nodes == NULL) {
+        if (!Stack_init(&the_node_stack)) return NULL;
+        free_nodes = &the_node_stack;
+    }
+
     if (num_heads >= LIST_MAX_NUM_HEADS) return NULL;
 
-    List* new_list = malloc(sizeof(List));
-    if (new_list == NULL) return NULL;
+    List* new_list = lists + num_heads;
 
     // The list is empty, so no nodes exist yet--so point "nowhere".
     new_list->head = new_list->tail = new_list->current = NULL;
@@ -29,16 +25,23 @@ int List_count(List* pList) {
 
 int List_add(List* pList, void* pItem) {
     assert(pList != NULL);
-    // If in C++, I would make these actually const. Might want to move to other part of file.
-    int FAILED = -1;
-    int SUCCEEDED = 0;
-    //  In real code, need to check if there are free nodes available before going further.
+    if (pList->size > 0) {
+        // Somewhere, deal with current node.
+        Node* new_node = Stack_pop(free_nodes);
+        if (new_node == NULL) return LIST_FAIL;
+        new_node->item = pItem;
 
-    if (pList->size == 0) {
+        new_node->prev = pList->current;
+        new_node->next = pList->current->next;
+        pList->current = new_node;
+
+        (pList->size)++;
+    }
+    else if (pList->size == 0) {
         //  Somewhere, deal with current node.
         
-        Node* new_node = malloc(sizeof(Node));
-        if (new_node == NULL) return FAILED;
+        Node* new_node = Stack_pop(free_nodes);
+        if (new_node == NULL) return LIST_FAIL;
         new_node->item = pItem;
 
         pList->head = new_node;
@@ -47,6 +50,7 @@ int List_add(List* pList, void* pItem) {
 
         pList->size = 1;
 
-        return SUCCEEDED;
+        return LIST_SUCCESS;
     }
+    else return LIST_FAIL;
 }

@@ -10,6 +10,13 @@
 
 #define LIST_SUCCESS 0
 #define LIST_FAIL -1
+// Maximum number of unique lists the system can support
+// (You may modify this, but reset the value to 10 when handing in your assignment)
+#define LIST_MAX_NUM_HEADS 10
+
+// Maximum total number of nodes (statically allocated) to be shared across all lists
+// (You may modify this, but reset the value to 100 when handing in your assignment)
+#define LIST_MAX_NUM_NODES 100
 
 typedef struct Node_s Node;
 struct Node_s {
@@ -24,21 +31,13 @@ enum ListOutOfBounds {
 };
 typedef struct List_s List;
 struct List_s {
-    // I'm a bit iffy on this being a pointer since List gets returned as a pointer itself 
-    // from List_create().
     Node* head;
     Node* current;
     Node* tail;
     int size;
 };
-
-// Maximum number of unique lists the system can support
-// (You may modify this, but reset the value to 10 when handing in your assignment)
-#define LIST_MAX_NUM_HEADS 10
-
-// Maximum total number of nodes (statically allocated) to be shared across all lists
-// (You may modify this, but reset the value to 100 when handing in your assignment)
-#define LIST_MAX_NUM_NODES 100
+List lists[LIST_MAX_NUM_HEADS];
+static int num_heads = 0;
 
 // General Error Handling:
 // Client code is assumed never to call these functions with a NULL List pointer, or 
@@ -128,5 +127,7 @@ void* List_trim(List* pList);
 // the first node in the list (if any).
 typedef bool (*COMPARATOR_FN)(void* pItem, void* pComparisonArg);
 void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg);
+
+#include "stack.h"
 
 #endif
