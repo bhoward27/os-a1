@@ -1,5 +1,7 @@
-CFLAGS = -o t
-OFLAGS = -g -c -Og
+#I think I have labelled the flags backwards. Ask about this?
+
+CFLAGS = -Wall -Werror -o t
+OFLAGS = -Wall -Werror -g -c -Og
 
 all: t
 

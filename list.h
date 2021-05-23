@@ -37,7 +37,7 @@ struct List_s {
     int size;
 };
 List lists[LIST_MAX_NUM_HEADS];
-static int num_heads = 0;
+extern int num_heads;
 
 // General Error Handling:
 // Client code is assumed never to call these functions with a NULL List pointer, or 
