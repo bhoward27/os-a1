@@ -8,6 +8,11 @@ struct Node_manager_s {
     Node* free_head;
 };
 
-Node_manager node_manager;
+extern Node_manager node_manager;
+extern Node_manager* nm_ptr;
+
+void init_free_list(Node_manager*);
+bool delete_node(Node_manager*, Node*);
+Node* new_node(Node_manager*);
 
 #endif

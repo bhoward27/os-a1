@@ -2,13 +2,11 @@
 #include "node_manager.h"
 
 List* List_create() {
-    // if (free_nodes == NULL) {
-    //     if (!Stack_init(&the_node_stack)) return NULL;
-    //     free_nodes = &the_node_stack;
-    // }
-
+    if (nm_ptr == NULL) {
+        init_free_list(&node_manager);
+        nm_ptr = &node_manager;
+    }
     if (num_heads >= LIST_MAX_NUM_HEADS) return NULL;
-
     List* new_list = lists + num_heads;
 
     // The list is empty, so no nodes exist yet--so point "nowhere".
@@ -19,38 +17,39 @@ List* List_create() {
 }
 
 int List_count(List* pList) {
-//     assert(pList != NULL);
-//     return pList->size;
-// }
+    assert(pList != NULL);
+    return pList->size;
+}
 
-// int List_add(List* pList, void* pItem) {
-//     assert(pList != NULL);
-//     if (pList->size > 0) {
-//         // Somewhere, deal with current node.
-//         Node* new_node = Stack_pop(free_nodes);
-//         if (new_node == NULL) return LIST_FAIL;
-//         new_node->item = pItem;
+int List_add(List* pList, void* pItem) {
+    assert(pList != NULL);
+    if (pList->size > 0) {
+        // Somewhere, deal with current node.
+        Node* x = new_node(nm_ptr);
+        if (x == NULL) return LIST_FAIL;
+        x->item = pItem;
 
-//         new_node->prev = pList->current;
-//         new_node->next = pList->current->next;
-//         pList->current = new_node;
+        x->prev = pList->current;
+        x->next = pList->current->next;
+        pList->current = x;
 
-//         (pList->size)++;
-//     }
-//     else if (pList->size == 0) {
-//         //  Somewhere, deal with current node.
+        (pList->size)++;
+    }
+    else if (pList->size == 0) {
+        //  Somewhere, deal with current node.
         
-//         Node* new_node = Stack_pop(free_nodes);
-//         if (new_node == NULL) return LIST_FAIL;
-//         new_node->item = pItem;
+        Node* x = new_node(nm_ptr);
+        if (x == NULL) return LIST_FAIL;
+        x->item = pItem;
 
-//         pList->head = new_node;
-//         pList->tail = new_node;
-//         new_node->next = new_node->prev = NULL;
+        pList->head = x;
+        pList->tail = x;
+        x->next = x->prev = NULL;
+        pList->current = x;
 
-//         pList->size = 1;
+        pList->size = 1;
 
-//         return LIST_SUCCESS;
-//     }
-//     else return LIST_FAIL;
+        return LIST_SUCCESS;
+    }
+    else return LIST_FAIL;
 }
