@@ -7,6 +7,9 @@ void test_add(List*, void*);
 void test_remove(List*);
 void test_prev(List*);
 void test_tail(List*);
+void test_curr(List*);
+void print_list(List*);
+void print_free_list(Node_manager*);
 
 int main() {
     List* l = List_create();
@@ -21,19 +24,25 @@ int main() {
 
     test_remove(l);
     test_tail(l);
+    test_curr(l);
 
     test_prev(l);
+    test_curr(l);
     test_remove(l);
     test_tail(l);
+    test_curr(l);
 
     test_prev(l);
+    test_curr(l);
     test_remove(l);
     test_tail(l);
+    test_curr(l);
 
     test_prev(l);
+    test_curr(l);
     test_remove(l);
-    test_prev(l);
-    test_remove(l);
+    test_tail(l);
+    test_curr(l);
     
     return 0;
 }
@@ -72,4 +81,23 @@ void test_tail(List* l) {
     printf("l->tail = %p\n", (void*) l->tail);
     // printf("LIST_OOB_END = %p\n", (void*) (Node*) LIST_OOB_END);
     printf("l->tail->item = %c\n", *((char*) l->tail->item));
+}
+
+void test_curr(List* l) {
+    printf("l->current = %p\n", (void*) l->current);
+    void* item = List_curr(l);
+    if (item == NULL) {
+        printf("l->current->item = INACCESSIBLE or NULL\n");
+    }
+    else {
+        printf("l->current->item = %c\n", *((char*) List_curr(l)));
+    }
+}
+
+void print_list(List* l) {
+
+}
+
+void print_free_list(Node_manager* nm) {
+
 }

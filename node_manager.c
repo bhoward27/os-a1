@@ -17,13 +17,12 @@ void init_free_list(Node_manager* node_manager) {
     current->next = NULL;
 }
 
-bool delete_node(Node_manager* node_manager, Node* x) {
+void delete_node(Node_manager* node_manager, Node* x) {
     assert(node_manager != NULL);
     assert(x != NULL);
 
     x->next = node_manager->free_head;
     node_manager->free_head = x;
-    return true;
 }
 
 Node* new_node(Node_manager* node_manager) {

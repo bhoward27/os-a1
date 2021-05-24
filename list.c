@@ -123,3 +123,10 @@ void* List_prev(List* pList) {
     
     return pList->current->item;
 }
+
+void* List_curr(List* pList) {
+    assert(pList != NULL);
+    Node* ptr = pList->current;
+    if (ptr == NULL || ptr == (Node*) LIST_OOB_START || ptr == (Node*) LIST_OOB_END) return NULL;
+    return ptr->item;
+}
