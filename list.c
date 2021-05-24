@@ -66,13 +66,6 @@ int List_add(List* pList, void* pItem) {
 // If the current pointer is before the start of the pList, or beyond the end of the pList,
 // then do not change the pList and return NULL.
 void* List_remove(List* pList) {
-    /*
-        Remember, if current = LIST_OOB_START (or END), it is NOT pointing to a node.
-        So if you say current = LIST_OOB, then you are saying current is bunk and can't be used.
-        Right? you're giving current an invalid value, so any other operation you do will fail
-        because current is invalid.
-        So I don't think you actually want to set current to LIST_OOB, but maybe it's next or prev.
-    */
     assert(pList != NULL);
     if (pList->size == 0) return NULL;
     Node* temp = pList->current;
@@ -90,8 +83,18 @@ void* List_remove(List* pList) {
     //     pList->current = temp->next;
     // }
 
+    if (pList->size == 1) {
+        pList->head = (Node*) LIST_OOB_START;
+        pList->tail = (Node*) LIST_OOB_END;
+        pList->current = NULL;
+        delete_node(nm_ptr, temp);
+        pList->size = 0;
+        return temp->item;
+    }
+
     if (temp == pList->tail) {
         pList->tail = temp->prev;
+        pList->tail->next = (Node*) LIST_OOB_END;
     }   
     pList->current = temp->next;
 

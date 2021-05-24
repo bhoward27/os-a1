@@ -10,6 +10,7 @@ void test_tail(List*);
 void test_curr(List*);
 void print_list(List*);
 void print_free_list(Node_manager*);
+void print_all_nodes(Node_manager*);
 
 int main() {
     List* l = List_create();
@@ -21,26 +22,32 @@ int main() {
     test_add(l, &two);
     test_add(l, &three);
     test_add(l, &four);
+    print_list(l);
+    test_curr(l);
 
     test_remove(l);
+    print_list(l);
     test_tail(l);
     test_curr(l);
 
     test_prev(l);
     test_curr(l);
     test_remove(l);
+    print_list(l);
     test_tail(l);
     test_curr(l);
 
     test_prev(l);
     test_curr(l);
     test_remove(l);
+    print_list(l);
     test_tail(l);
     test_curr(l);
 
     test_prev(l);
     test_curr(l);
     test_remove(l);
+    print_list(l);
     test_tail(l);
     test_curr(l);
     
@@ -52,7 +59,13 @@ void test_count(List* l) {
 }
 
 void test_add(List* l, void* item) {
-    printf("List_add(l, item) = %d\n", List_add(l, item));
+    char* x = (char*) item;
+    if (x != NULL) {
+        printf("List_add(l, *item = %c) = %d\n", *x, List_add(l, item));
+    }
+    else {
+        printf("List_add(l, item = NULL) = %d\n", List_add(l, item));
+    }
     test_count(l);
 }
 
@@ -78,26 +91,71 @@ void test_prev(List* l) {
 }
 
 void test_tail(List* l) {
-    printf("l->tail = %p\n", (void*) l->tail);
-    // printf("LIST_OOB_END = %p\n", (void*) (Node*) LIST_OOB_END);
-    printf("l->tail->item = %c\n", *((char*) l->tail->item));
+    if (l->tail == NULL || l->tail == (Node*) LIST_OOB_END) {
+         printf("Bad tail. Tail = %p\n", (void*) l->tail);
+    }
+    else {
+        printf("l->tail = %p\n", (void*) l->tail);
+        printf("l->tail->item = %c\n", *((char*) l->tail->item));
+    }
 }
 
 void test_curr(List* l) {
-    printf("l->current = %p\n", (void*) l->current);
-    void* item = List_curr(l);
-    if (item == NULL) {
-        printf("l->current->item = INACCESSIBLE or NULL\n");
+    if (l->current == NULL) {
+        printf("l->current = NULL\n");
     }
     else {
-        printf("l->current->item = %c\n", *((char*) List_curr(l)));
+        printf("l->current = %p\n", (void*) l->current);
+        void* item = List_curr(l);
+        if (item == NULL) {
+            printf("l->current->item = INACCESSIBLE or NULL\n");
+        }
+        else {
+            printf("l->current->item = %c\n", *((char*) List_curr(l)));
+        }
     }
 }
 
-void print_list(List* l) {
+void print_list(List *l) {
+    assert(l != NULL);
+    Node *head = l->head;
+    Node *tail = l->tail;
 
+    if (l->size == 0) {
+        printf("-------l--------\n");
+        printf("Empty.\n");
+        return;
+    }
+    if (head == (Node*) LIST_OOB_START || head == (Node*) LIST_OOB_END || head == NULL) {
+        printf("Bad head. Head = %p\n", (void *) head);
+        return;
+    }
+    if (tail == (Node*) LIST_OOB_END || tail == (Node*) LIST_OOB_START || tail == NULL) {
+        printf("Bad tail. Tail = %p\n", (void*) tail);
+    }
+
+    printf("-------l--------\n");
+    Node *cursor = head;
+    char *item = NULL;
+    while (cursor != tail) {
+        item = (char*) cursor->item;
+        if (item != NULL)
+            printf("%c -> ", *item);
+        else
+            printf("INACCESSIBLE -> ");
+        cursor = cursor->next;
+    }
+    item = (char*) cursor->item;
+    if (item != NULL)
+        printf("%c\n\n", *item);
+    else
+        printf("INACCESSIBLE\n\n");
 }
 
-void print_free_list(Node_manager* nm) {
+void print_free_list(Node_manager *nm) {
+    
+}
+
+void print_all_nodes(Node_manager *nm) {
 
 }
