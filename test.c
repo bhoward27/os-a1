@@ -6,22 +6,30 @@ void test_count(List*);
 void test_add(List*, void*);
 void test_remove(List*);
 void test_prev(List*);
+void test_tail(List*);
 
 int main() {
     List* l = List_create();
-    char ch = 'a';
-    test_add(l, &ch);
-    char q = '3';
-    char b = 'b';
-    test_add(l, &ch);
-    test_add(l, &q);
-    test_add(l, &b);
+    char one = '1';
+    test_add(l, &one);
+    char two = '2';
+    char three = '3';
+    char four = '4';
+    test_add(l, &two);
+    test_add(l, &three);
+    test_add(l, &four);
 
     test_remove(l);
+    test_tail(l);
+
     test_prev(l);
     test_remove(l);
+    test_tail(l);
+
     test_prev(l);
     test_remove(l);
+    test_tail(l);
+
     test_prev(l);
     test_remove(l);
     test_prev(l);
@@ -58,4 +66,10 @@ void test_prev(List* l) {
     else {
         printf("List_prev(l) = %c\n", *item);
     }
+}
+
+void test_tail(List* l) {
+    printf("l->tail = %p\n", (void*) l->tail);
+    // printf("LIST_OOB_END = %p\n", (void*) (Node*) LIST_OOB_END);
+    printf("l->tail->item = %c\n", *((char*) l->tail->item));
 }

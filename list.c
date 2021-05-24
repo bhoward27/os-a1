@@ -34,7 +34,10 @@ int List_add(List* pList, void* pItem) {
 
         x->prev = pList->current;
         x->next = pList->current->next;
+        pList->current->next = x;
+
         pList->current = x;
+        if (x->prev == pList->tail) pList->tail = x;
 
         (pList->size)++;
         return LIST_SUCCESS;
@@ -59,6 +62,9 @@ int List_add(List* pList, void* pItem) {
     else return LIST_FAIL;
 }
 
+// Return current item and take it out of pList. Make the next item the current one.
+// If the current pointer is before the start of the pList, or beyond the end of the pList,
+// then do not change the pList and return NULL.
 void* List_remove(List* pList) {
     /*
         Remember, if current = LIST_OOB_START (or END), it is NOT pointing to a node.
@@ -73,7 +79,22 @@ void* List_remove(List* pList) {
     if (temp == (Node*) LIST_OOB_END || temp == (Node*) LIST_OOB_START) {
         return NULL;
     }
+    // Commented below out as this functionality is not asked for 
+    // (says to always advance current, can't go backwards, 
+    // so I assume that it's okay to give current a "bad" value.
+    // if (temp->next == (Node*) LIST_OOB_END) {
+    //     // pList->tail = pList->current = temp->prev;
+    //     // pList->current->next = (Node*) LIST_OOB_END;
+    // }
+    // else {
+    //     pList->current = temp->next;
+    // }
+
+    if (temp == pList->tail) {
+        pList->tail = temp->prev;
+    }   
     pList->current = temp->next;
+
     delete_node(nm_ptr, temp);
     (pList->size)--;
     return temp->item;
@@ -85,12 +106,20 @@ void* List_remove(List* pList) {
 void* List_prev(List* pList) {
     assert(pList != NULL);
 
-    if (pList->current == (Node*) LIST_OOB_START || pList->current == (Node*) LIST_OOB_END) {
+    if (pList->current == (Node*) LIST_OOB_START) return NULL;
+
+    // If we get this "bad" input, assume that the previous element should be the tail.
+    if (pList->current == (Node*) LIST_OOB_END) {
+        pList->current = pList->tail;
+        return pList->tail->item;
+    }
+
+    if (pList->current->prev == (Node*) LIST_OOB_START) {
+        pList->current = LIST_OOB_START;
         return NULL;
     }
 
     pList->current = pList->current->prev;
-    if (pList->current == (Node*) LIST_OOB_START) return NULL;
     
     return pList->current->item;
 }
