@@ -19,6 +19,7 @@ void init_free_list(Node_manager* node_manager) {
 void delete_node(Node_manager* node_manager, Node* x) {
     assert(node_manager != NULL);
     assert(x != NULL);
+    assert(x != node_manager->free_head);
 
     x->next = node_manager->free_head;
     node_manager->free_head = x;
