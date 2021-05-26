@@ -125,18 +125,17 @@ void test_curr(List* l) {
 
 void print_list(List *l) {
     assert(l != NULL);
-    Node *head = l->head;
-    Node *tail = l->tail;
-
     if (l->size == 0) {
         printf("-------l--------\n");
         printf("Empty.\n\n");
         return;
     }
+    Node *head = l->head;
     if (head == NULL) {
         printf("Bad head. Head = NULL\n\n");
         return;
     }
+    Node *tail = l->tail;
     if (tail == NULL) {
         printf("Bad tail. Tail = NULL\n\n");
         return;
@@ -144,16 +143,15 @@ void print_list(List *l) {
 
     printf("-------l--------\n");
     Node *cursor = head;
-    char *item = NULL;
     while (cursor != tail) {
-        item = (char*) cursor->item;
+        char* item = (char*) cursor->item;
         if (item != NULL)
             printf("%c -> ", *item);
         else
             printf("INACCESSIBLE -> ");
         cursor = cursor->next;
     }
-    item = (char*) cursor->item;
+    char* item = (char*) cursor->item;
     if (item != NULL)
         printf("%c\n\n", *item);
     else

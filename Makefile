@@ -9,10 +9,10 @@ t: test.o list.o node_manager.o
 test.o: test.c list.h node_manager.h
 	gcc $(OFLAGS) test.c
 
-list.o: list.c list.h
+list.o: list.c list.h node_manager.h
 	gcc $(OFLAGS) list.c
 
-node_manager.o: node_manager.c node_manager.h
+node_manager.o: node_manager.c node_manager.h list.h
 	gcc $(OFLAGS) node_manager.c
 
 clean:
