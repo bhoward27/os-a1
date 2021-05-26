@@ -1,5 +1,5 @@
-CFLAGS = -Wall -Werror -o t
-OFLAGS = -Wall -Werror -g -c -Og
+CFLAGS = -Wall -Werror -std=c11 -o t
+OFLAGS = -Wall -Werror -std=c11 -g -c -Og
 
 all: t
 

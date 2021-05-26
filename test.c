@@ -13,12 +13,19 @@ void print_free_list(Node_manager*);
 void print_all_nodes(Node_manager*);
 
 int main() {
+    printf("Possible values for current_state:\n"
+        "LIST_OOB_START = %d\n"
+        "LIST_OOB_END = %d\n"
+        "LIST_OOB_OK = %d\n"
+        "LIST_OOB_BAD = %d\n\n", 
+        LIST_OOB_START, LIST_OOB_END, LIST_OOB_OK, LIST_OOB_BAD);
+
     List* l = List_create();
     char one = '1';
-    test_add(l, &one);
     char two = '2';
     char three = '3';
     char four = '4';
+    test_add(l, &one);
     test_add(l, &two);
     test_add(l, &three);
     test_add(l, &four);
@@ -91,8 +98,8 @@ void test_prev(List* l) {
 }
 
 void test_tail(List* l) {
-    if (l->tail == NULL || l->tail == (Node*) LIST_OOB_END) {
-         printf("Bad tail. Tail = %p\n", (void*) l->tail);
+    if (l->tail == NULL) {
+         printf("Bad tail. Tail = NULL\n");
     }
     else {
         printf("l->tail = %p\n", (void*) l->tail);
@@ -102,10 +109,10 @@ void test_tail(List* l) {
 
 void test_curr(List* l) {
     if (l->current == NULL) {
-        printf("l->current = NULL\n");
+        printf("l->current = NULL\nl->current_state = %d\n", l->current_state);
     }
     else {
-        printf("l->current = %p\n", (void*) l->current);
+        printf("l->current = %p\nl->current_state = %d\n", (void*) l->current, l->current_state);
         void* item = List_curr(l);
         if (item == NULL) {
             printf("l->current->item = INACCESSIBLE or NULL\n");
@@ -123,15 +130,16 @@ void print_list(List *l) {
 
     if (l->size == 0) {
         printf("-------l--------\n");
-        printf("Empty.\n");
+        printf("Empty.\n\n");
         return;
     }
-    if (head == (Node*) LIST_OOB_START || head == (Node*) LIST_OOB_END || head == NULL) {
-        printf("Bad head. Head = %p\n", (void *) head);
+    if (head == NULL) {
+        printf("Bad head. Head = NULL\n\n");
         return;
     }
-    if (tail == (Node*) LIST_OOB_END || tail == (Node*) LIST_OOB_START || tail == NULL) {
-        printf("Bad tail. Tail = %p\n", (void*) tail);
+    if (tail == NULL) {
+        printf("Bad tail. Tail = NULL\n\n");
+        return;
     }
 
     printf("-------l--------\n");

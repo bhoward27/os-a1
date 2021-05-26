@@ -27,16 +27,25 @@ struct Node_s {
 
 enum ListOutOfBounds {
     LIST_OOB_START,
-    LIST_OOB_END
+    LIST_OOB_END,
+
+    // This indicates that current is not out of bounds and the pointer is valid (OK)
+    LIST_OOB_OK,
+
+    // This indicates that current is not out of bounds, per se, but it's still a BAD pointer.
+    // One instance where this happens is when the list is empty.
+    LIST_OOB_BAD
 };
+
 typedef struct List_s List;
 struct List_s {
     Node* head;
     Node* current;
     Node* tail;
     int size;
+    enum ListOutOfBounds current_state;
 };
-List lists[LIST_MAX_NUM_HEADS];
+extern List lists[LIST_MAX_NUM_HEADS];
 extern int num_heads;
 
 // General Error Handling:
