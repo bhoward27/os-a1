@@ -17,16 +17,19 @@ void print_free_list(Node_manager*);
 void print_all_nodes(Node_manager*);
 void old_test();
 void rand_alloc(const int, List**, char*, const int);
+void rand_alloc_p(const int, List***, char*, const int);
 void rand_dealloc(const int, List**, char*, const int);
+void rand_dealloc_p(const int, List***, char*, const int);
 void testerino(const int, List**, char*, const int);
+void testerino_p(const int, List***, char*, const int);
 void test_create(List**, char);
+void test_createrino(const int, List***, char*);
 
 char items[NUM_ITEMS];
 
 int main() {
     // Create the array of items which will be referenced by nodes.
     // chars with ASCII code 33 to 126 are readable.
-    
     for (int i = 0; i < NUM_ITEMS; i++) {
         items[i] = (char) i + 33;
     }
@@ -48,42 +51,35 @@ int main() {
     List* l;
 
     // Create three empty lists.
-    a = List_create();
-    b = List_create();
-    c = List_create();
-
     const int NUM_LISTS1 = 3;
-    List* lists1[] = {a, b, c};
+    List** lists1[] = {&a, &b, &c};
     char list_names1[] = {'a', 'b', 'c'};
+    test_createrino(NUM_LISTS1, lists1, list_names1);
 
     // Add 90 elements total, allocating randomly.
     const int NUM_ELEMS1 = 90;
     
     srand(time(0));
-    rand_alloc(NUM_ELEMS1, lists1, list_names1, NUM_LISTS1);
-    testerino(NUM_LISTS1, lists1, list_names1, NUM_ELEMS1);
+    rand_alloc_p(NUM_ELEMS1, lists1, list_names1, NUM_LISTS1);
+    testerino_p(NUM_LISTS1, lists1, list_names1, NUM_ELEMS1);
 
     // Try to add more than 100 nodes collectively to all the lists.
-    d = List_create();
-    e = List_create();
-
     const int NUM_LISTS2 = 2;
-    List* lists2[] = {d, e};
+    List** lists2[] = {&d, &e};
     char list_names2[] = {'d', 'e'};
+    test_createrino(NUM_LISTS2, lists2, list_names2);
 
     // Add 11 elements total, allocating randomly.
     const int NUM_ELEMS2 = 11;
-    rand_alloc(NUM_ELEMS2, lists2, list_names2, NUM_LISTS2);
-    testerino(NUM_LISTS2, lists2, list_names2, NUM_ELEMS2);
+    rand_alloc_p(NUM_ELEMS2, lists2, list_names2, NUM_LISTS2);
+    testerino_p(NUM_LISTS2, lists2, list_names2, NUM_ELEMS2);
 
     // Try to create 7 more lists 
     // In that case we'll have 12 lists in total--2 more than the maximum allowed.
     const int NUM_LISTS3 = 7;
     List** lists3[] = {&f, &g, &h, &i, &j, &k, &l};
     char list_names3[] = {'f', 'g', 'h', 'i', 'j', 'k', 'l'};
-    for (int i = 0; i < NUM_LISTS3; i++) {
-        test_create(lists3[i], list_names3[i]);
-    }
+    test_createrino(NUM_LISTS3, lists3, list_names3);
     printf("\n");
 
     // Remove 80 nodes randomly from lists that have size != 0.
@@ -94,13 +90,19 @@ int main() {
     rand_dealloc(NUM_ELEMS4, lists4, list_names4, NUM_LISTS4);
     testerino(NUM_LISTS4, lists4, list_names4, 100 - NUM_ELEMS4);
 
+    // Do some more allocations and deallocations to make sure that things don't get into a bad 
+    // state after removals or additions--CURRENTLY THEY DO.
     const int NUM_LISTS5 = 10;
+    const int NUM_ELEMS5 = 50;
     List* lists5[] = {a, b, c, d, e, f, g, h, i, j};
-    // ***NEED TO ADD ONE LAST TEST***
-    // Test with removes and adds done randomly on random lists, y'know, intermixed with each other
-    // Run it like, a thousand times to see what happens.
-    // If you're good there, then the current functionality is definitely working as intended.
+    char list_names5[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
 
+    rand_alloc(NUM_ELEMS5, lists5, list_names5, NUM_LISTS5);
+    testerino(NUM_LISTS5, lists5, list_names5, NUM_ELEMS5 + 20);
+
+    const int NUM_ELEMS6 = 27;
+    rand_dealloc(NUM_ELEMS6, lists5, list_names5, NUM_LISTS5);
+    testerino(NUM_LISTS5, lists5, list_names5, NUM_ELEMS5 + 20 - NUM_ELEMS6);
 
     return 0;
 }
@@ -115,10 +117,23 @@ void test_create(List** list, char list_name) {
     }
 }
 
+void test_createrino(const int NUM_LISTS, List*** lists, char* list_names) {
+    for (int i = 0; i < NUM_LISTS; i++) {
+        test_create(lists[i], list_names[i]);
+    }
+}
+
 void rand_alloc(const int NUM_ELEMS, List** lists, char* list_names, const int NUM_LISTS) {
     for (int i = 0; i < NUM_ELEMS; ++i) {
         int choice = rand() % NUM_LISTS;
         test_add(lists[choice], (void*) (items + i), list_names[choice]);
+    }
+}
+
+void rand_alloc_p(const int NUM_ELEMS, List*** lists, char* list_names, const int NUM_LISTS) {
+    for (int i = 0; i < NUM_ELEMS; ++i) {
+        int choice = rand() % NUM_LISTS;
+        test_add(*(lists[choice]), (void*) (items + i), list_names[choice]);
     }
 }
 
@@ -145,11 +160,46 @@ void rand_dealloc(const int NUM_ELEMS, List** lists, char* list_names, const int
     }
 }
 
+void rand_dealloc_p(const int NUM_ELEMS, List*** lists, char* list_names, const int NUM_LISTS) {
+    for (int i = 0; i < NUM_ELEMS; ++i) {
+        int choice = rand() % NUM_LISTS;
+        List* list = *(lists[choice]);
+        char list_name = list_names[choice];
+        int size = List_count(list);
+
+        // If list is empty, of course we can't remove anything, so try again for a different list.
+        if (size == 0) { 
+            i--;
+            continue;
+        }
+
+        void* item = test_remove(list, list_name);
+
+        // If it failed, try doing List_prev and then removing.
+        if (item == NULL) {
+            test_prev(list, list_name);
+            item = test_remove(list, list_name);
+        }
+    }
+}
+
 void testerino(const int NUM_LISTS, List** lists, char* list_names, const int NUM_REQUESTED_NODES) {
     int total = 0;
     for (int i = 0; i < NUM_LISTS; ++i) {
         print_list(lists[i], list_names[i]);
         total += test_count(lists[i], list_names[i]);
+        printf("\n");
+    }
+    printf("Total number of elements (actual) = %d\n", total);
+    printf("Total number of elements (requested) = %d\n", NUM_REQUESTED_NODES);
+    printf("\n");
+}
+
+void testerino_p(const int NUM_LISTS, List*** lists, char* list_names, const int NUM_REQUESTED_NODES) {
+    int total = 0;
+    for (int i = 0; i < NUM_LISTS; ++i) {
+        print_list(*(lists[i]), list_names[i]);
+        total += test_count(*(lists[i]), list_names[i]);
         printf("\n");
     }
     printf("Total number of elements (actual) = %d\n", total);

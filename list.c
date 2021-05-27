@@ -38,13 +38,35 @@ int List_add(List* pList, void* pItem) {
     x->item = pItem;
 
     if (size > 0) {
-        //  Should probably be checking current_state
-        x->prev = pList->current;
-        x->next = pList->current->next;
-        pList->current->next = x;
+        enum ListOutOfBounds state = pList->current_state;
+        switch(state) {
+            case LIST_OOB_OK:
+                x->prev = pList->current;
+                x->next = pList->current->next; // Segmentation fault will occur here if current is NULL.
+                pList->current->next = x;
 
-        pList->current = x;
-        if (x->prev == pList->tail) pList->tail = x;
+                pList->current = x;
+                if (x->prev == pList->tail) pList->tail = x;
+                break;
+
+            // Adds the new item to pList directly after the current item, and makes item the current item. 
+            
+            // If the current pointer is before the start of the pList, the item is added at the start.
+            case LIST_OOB_START:
+                
+                break;
+
+            // If the current pointer is beyond the end of the pList, the item is added at the end. 
+            case LIST_OOB_END:
+
+                break;
+
+            // These last two cases should be impossible (esp. when size > 0) so abort.
+            case LIST_OOB_BAD:
+            default:
+                return LIST_FAIL;
+                break;
+        }
     }
     else {
         pList->head = x;
