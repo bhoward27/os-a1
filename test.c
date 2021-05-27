@@ -4,6 +4,7 @@
 #include "node_manager.h"
 #include <stdbool.h>
 #include <time.h>
+#define NUM_ITEMS 126
 
 int test_count(List*);
 void test_add(List*, void*);
@@ -15,13 +16,15 @@ void print_list(List*, char);
 void print_free_list(Node_manager*);
 void print_all_nodes(Node_manager*);
 void old_test();
+void rand_alloc(const int, List**, const int);
+void testerino(const int, List**, char*, const int);
 
-const int NUM_ITEMS = 126; 
+char items[NUM_ITEMS];
 
 int main() {
     // Create the array of items which will be referenced by nodes.
     // chars with ASCII code 33 to 126 are readable.
-    char items[NUM_ITEMS];
+    
     for (int i = 0; i < NUM_ITEMS; i++) {
         items[i] = (char) i + 33;
     }
@@ -45,19 +48,41 @@ int main() {
     b = List_create();
     c = List_create();
 
-    const int NUM_LISTS = 3;
-    List* lists[] = {a, b, c};
-    char list_names[] = {'a', 'b', 'c'};
+    const int NUM_LISTS1 = 3;
+    List* lists1[] = {a, b, c};
+    char list_names1[] = {'a', 'b', 'c'};
 
     // Add 90 elements total, allocating randomly.
-    const int NUM_ELEMS = 90;
+    const int NUM_ELEMS1 = 90;
     
     srand(time(0));
+    rand_alloc(NUM_ELEMS1, lists1, NUM_LISTS1);
+    testerino(NUM_LISTS1, lists1, list_names1, NUM_ELEMS1);
+
+    // Try to add more than 100 nodes collectively to all the lists.
+    d = List_create();
+    e = List_create();
+
+    const int NUM_LISTS2 = 2;
+    List* lists2[] = {d, e};
+    char list_names2[] = {'d', 'e'};
+
+    // Add 11 elements total, allocating randomly.
+    const int NUM_ELEMS2 = 11;
+    rand_alloc(NUM_ELEMS2, lists2, NUM_LISTS2);
+    testerino(NUM_LISTS2, lists2, list_names2, NUM_ELEMS2);
+
+    return 0;
+}
+
+void rand_alloc(const int NUM_ELEMS, List** lists, const int NUM_LISTS) {
     for (int i = 0; i < NUM_ELEMS; ++i) {
         int choice = rand() % NUM_LISTS;
         List_add(lists[choice], (void*) (items + i));
     }
+}
 
+void testerino(const int NUM_LISTS, List** lists, char* list_names, const int NUM_ELEMS) {
     int total = 0;
     for (int i = 0; i < NUM_LISTS; ++i) {
         print_list(lists[i], list_names[i]);
@@ -65,11 +90,8 @@ int main() {
         printf("\n");
     }
     printf("Total number of elements (actual) = %d\n", total);
-    printf("Total number of elements (expected) = %d\n", NUM_ELEMS);
+    printf("Total number of elements (requested) = %d\n", NUM_ELEMS);
     printf("\n");
-
-
-    return 0;
 }
 
 // void old_test() {
