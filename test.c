@@ -6,9 +6,9 @@
 #include <time.h>
 #define NUM_ITEMS 126
 
-int test_count(List*);
-void test_add(List*, void*);
-void test_remove(List*);
+int test_count(List*, char);
+void test_add(List*, void*, char);
+void test_remove(List*, char);
 void test_prev(List*);
 void test_tail(List*);
 void test_curr(List*);
@@ -16,7 +16,7 @@ void print_list(List*, char);
 void print_free_list(Node_manager*);
 void print_all_nodes(Node_manager*);
 void old_test();
-void rand_alloc(const int, List**, const int);
+void rand_alloc(const int, List**, char*, const int);
 void testerino(const int, List**, char*, const int);
 
 char items[NUM_ITEMS];
@@ -56,7 +56,7 @@ int main() {
     const int NUM_ELEMS1 = 90;
     
     srand(time(0));
-    rand_alloc(NUM_ELEMS1, lists1, NUM_LISTS1);
+    rand_alloc(NUM_ELEMS1, lists1, list_names1, NUM_LISTS1);
     testerino(NUM_LISTS1, lists1, list_names1, NUM_ELEMS1);
 
     // Try to add more than 100 nodes collectively to all the lists.
@@ -69,16 +69,16 @@ int main() {
 
     // Add 11 elements total, allocating randomly.
     const int NUM_ELEMS2 = 11;
-    rand_alloc(NUM_ELEMS2, lists2, NUM_LISTS2);
+    rand_alloc(NUM_ELEMS2, lists2, list_names2, NUM_LISTS2);
     testerino(NUM_LISTS2, lists2, list_names2, NUM_ELEMS2);
 
     return 0;
 }
 
-void rand_alloc(const int NUM_ELEMS, List** lists, const int NUM_LISTS) {
+void rand_alloc(const int NUM_ELEMS, List** lists, char* list_names, const int NUM_LISTS) {
     for (int i = 0; i < NUM_ELEMS; ++i) {
         int choice = rand() % NUM_LISTS;
-        List_add(lists[choice], (void*) (items + i));
+        test_add(lists[choice], (void*) (items + i), list_names[choice]);
     }
 }
 
@@ -86,7 +86,7 @@ void testerino(const int NUM_LISTS, List** lists, char* list_names, const int NU
     int total = 0;
     for (int i = 0; i < NUM_LISTS; ++i) {
         print_list(lists[i], list_names[i]);
-        total += test_count(lists[i]);
+        total += test_count(lists[i], list_names[i]);
         printf("\n");
     }
     printf("Total number of elements (actual) = %d\n", total);
@@ -94,79 +94,30 @@ void testerino(const int NUM_LISTS, List** lists, char* list_names, const int NU
     printf("\n");
 }
 
-// void old_test() {
-//     printf("Possible values for current_state:\n"
-//         "LIST_OOB_START = %d\n"
-//         "LIST_OOB_END = %d\n"
-//         "LIST_OOB_OK = %d\n"
-//         "LIST_OOB_BAD = %d\n\n", 
-//         LIST_OOB_START, LIST_OOB_END, LIST_OOB_OK, LIST_OOB_BAD);
-
-//     List* l = List_create();
-//     char one = '1';
-//     char two = '2';
-//     char three = '3';
-//     char four = '4';
-//     test_add(l, &one);
-//     test_add(l, &two);
-//     test_add(l, &three);
-//     test_add(l, &four);
-//     print_list(l);
-//     test_curr(l);
-
-//     test_remove(l);
-//     print_list(l);
-//     test_tail(l);
-//     test_curr(l);
-
-//     test_prev(l);
-//     test_curr(l);
-//     test_remove(l);
-//     print_list(l);
-//     test_tail(l);
-//     test_curr(l);
-
-//     test_prev(l);
-//     test_curr(l);
-//     test_remove(l);
-//     print_list(l);
-//     test_tail(l);
-//     test_curr(l);
-
-//     test_prev(l);
-//     test_curr(l);
-//     test_remove(l);
-//     print_list(l);
-//     test_tail(l);
-//     test_curr(l);
-// }
-
-int test_count(List* l) {
-    int count = List_count(l);
-    printf("List_count(l) = %d\n", count);
+int test_count(List* list, char list_name) {
+    int count = List_count(list);
+    printf("List_count(%c) = %d\n", list_name, count);
     return count;
 }
 
-void test_add(List* l, void* item) {
+void test_add(List* l, void* item, char list_name) {
     char* x = (char*) item;
     if (x != NULL) {
-        printf("List_add(l, *item = %c) = %d\n", *x, List_add(l, item));
+        printf("List_add(%c, *item = %c) = %d\n", list_name, *x, List_add(l, item));
     }
     else {
-        printf("List_add(l, item = NULL) = %d\n", List_add(l, item));
+        printf("List_add(%c, item = NULL) = %d\n", list_name, List_add(l, item));
     }
-    test_count(l);
 }
 
-void test_remove(List* l) {
-    char* item = (char*) List_remove(l);
+void test_remove(List* list, char list_name) {
+    char* item = (char*) List_remove(list);
     if (item == NULL) {
-        printf("List_remove(l, item) = NULL\n");
+        printf("List_remove(%c, item) = NULL\n", list_name);
     }
     else {
-        printf("List_remove(l, item) = %c\n", *item);
+        printf("List_remove(%c, item) = %c\n", list_name, *item);
     }
-    test_count(l);
 }
 
 void test_prev(List* l) {
