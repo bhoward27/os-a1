@@ -1,9 +1,12 @@
-CFLAGS = -Wall -Werror -std=c11 -o t
-OFLAGS = -Wall -Werror -std=c11 -g -c -Og
+CFLAGS = -Wall -std=c11 -o test.out
+OFLAGS = -Wall -std=c11 -g -c -Og
 
-all: t
+all: test.out
 
-t: test.o list.o node_manager.o
+run: test.out
+	./test.out
+
+test.out: test.o list.o node_manager.o
 	gcc $(CFLAGS) test.o list.o node_manager.o
 
 test.o: test.c list.h node_manager.h
@@ -16,4 +19,4 @@ node_manager.o: node_manager.c node_manager.h list.h
 	gcc $(OFLAGS) node_manager.c
 
 clean:
-	rm -f *.o *.s t
+	rm -f *.o *.s *.out

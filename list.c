@@ -128,30 +128,33 @@ void* List_curr(List* pList) {
     return ptr->item;
 }
 
-// Returns a pointer to the first item in pList and makes the first item the current item.
-// Returns NULL and sets current item to NULL if list is empty.
 void* List_first(List* pList) {
     assert(pList != NULL);
-    if (List_count(pList) == 0) {
+    return List_fl(pList, pList->head);
+}
+
+void* List_last(List* pList) {
+    assert(pList != NULL);
+    return List_fl(pList, pList->tail);
+}
+
+// This helper function should only be called by List_first or List_last.
+void* List_fl(List* pList, Node* fl) {
+    int size = List_count(pList);
+    assert(size >= 0);
+    if (size == 0) {
         // No need to set current to NULL, as, if the list is empty, this SHOULD already be the case.
         return NULL;
     }
-    Node* first = pList->tail;
-    // Not done here.
-
-
-    return first->item;
+    // We assume here that fl can't be NULL if size > 0.
+    pList->current = fl;
+    pList->current_state = LIST_OOB_OK;
+    return fl->item;
 }
 
-// Returns a pointer to the last item in pList and makes the last item the current item.
-// Returns NULL and sets current item to NULL if list is empty.
-// void* List_last(List* pList) {
-
-// }
-
-// // Advances pList's current item by one, and returns a pointer to the new current item.
-// // If this operation advances the current item beyond the end of the pList, a NULL pointer 
-// // is returned and the current item is set to be beyond end of pList.
+// Advances pList's current item by one, and returns a pointer to the new current item.
+// If this operation advances the current item beyond the end of the pList, a NULL pointer 
+// is returned and the current item is set to be beyond end of pList.
 // void* List_next(List* pList) {
-
+    
 // }
