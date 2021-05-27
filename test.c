@@ -9,7 +9,7 @@
 int test_count(List*, char);
 void test_add(List*, void*, char);
 void* test_remove(List*, char);
-void test_prev(List*, char);
+void* test_prev(List*, char);
 void test_tail(List*);
 void test_curr(List*);
 void print_list(List*, char);
@@ -103,6 +103,20 @@ int main() {
     const int NUM_ELEMS6 = 27;
     rand_dealloc(NUM_ELEMS6, lists5, list_names5, NUM_LISTS5);
     testerino(NUM_LISTS5, lists5, list_names5, NUM_ELEMS5 + 20 - NUM_ELEMS6);
+
+    List* y = f;
+    char y_name = 'f';
+    while (test_prev(y, y_name) != NULL);
+    char ch = '^';
+    test_add(y, (void*) &ch, y_name);
+    print_list(y, y_name);
+    test_count(y, y_name);
+    printf("\n");
+    while (test_prev(y, y_name) != NULL);
+    test_remove(y, y_name);
+    print_list(y, y_name);
+    test_count(y, y_name);
+    printf("\n");
 
     return 0;
 }
@@ -235,7 +249,7 @@ void* test_remove(List* list, char list_name) {
     }
 }
 
-void test_prev(List* l, char list_name) {
+void* test_prev(List* l, char list_name) {
     char* item = (char*) List_prev(l);
     if (item == NULL) {
         printf("List_prev(%c) = NULL\n", list_name);
@@ -243,6 +257,7 @@ void test_prev(List* l, char list_name) {
     else {
         printf("List_prev(%c) = %c\n", list_name, *item);
     }
+    return item;
 }
 
 void test_tail(List* l) {

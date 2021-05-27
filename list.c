@@ -42,7 +42,7 @@ int List_add(List* pList, void* pItem) {
         switch(state) {
             case LIST_OOB_OK:
                 x->prev = pList->current;
-                x->next = pList->current->next; // Segmentation fault will occur here if current is NULL.
+                x->next = pList->current->next;
                 pList->current->next = x;
 
                 pList->current = x;
@@ -53,12 +53,22 @@ int List_add(List* pList, void* pItem) {
             
             // If the current pointer is before the start of the pList, the item is added at the start.
             case LIST_OOB_START:
-                
+                x->prev = NULL;
+                x->next = pList->head;
+                pList->head->prev = x;
+                pList->head = x;
+                pList->current = x;
+                pList->current_state = LIST_OOB_OK;
                 break;
 
             // If the current pointer is beyond the end of the pList, the item is added at the end. 
             case LIST_OOB_END:
-
+                x->prev = pList->tail;
+                x->next = NULL;
+                pList->tail->next = x;
+                pList->tail = x;
+                pList->current = x;
+                pList->current_state = LIST_OOB_OK;
                 break;
 
             // These last two cases should be impossible (esp. when size > 0) so abort.
