@@ -162,7 +162,6 @@ void* List_fl(List* pList, Node* fl) {
     return fl->item;
 }
 
-
 void* List_next(List* pList) {
     assert(pList != NULL);
     enum ListOutOfBounds state = pList->current_state;
@@ -265,3 +264,44 @@ void List_add_to_empty(List* pList, Node* x) {
     pList->current = x;
     pList->current_state = LIST_OOB_OK;
 }
+
+// Adds item to the end of pList, and makes the new item the current one. 
+// Returns 0 on success, -1 on failure.
+int List_append(List* pList, void* pItem) {
+    return List_pend(pList, pItem, List_add_to_end);
+}
+
+// Adds item to the front of pList, and makes the new item the current one. 
+// Returns 0 on success, -1 on failure.
+int List_prepend(List* pList, void* pItem) {
+    return List_pend(pList, pItem, List_add_to_start);
+}
+
+// Helper function for List_prepend and List_append.
+int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
+    assert(pList != NULL);
+    int size = List_count(pList);
+
+    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
+    assert(size >= 0);
+
+    Node* x = new_node(nm_ptr);
+    if (x == NULL) return LIST_FAIL;
+    x->item = pItem;
+
+    if (size > 0) not_empty_func(pList, x);
+    else List_add_to_empty(pList, x);
+    (pList->size)++;
+    return LIST_SUCCESS;
+}
+
+// Deal with following before implementing List_concat():
+// • Your .c file may include additional “private” (internally linked static) functions. The .h file must not expose any “private” functions. (i.e., your .h file must only expose those functions listed in the provided list.h).
+// • Any global variables must be static (internally linked).
+
+// Adds pList2 to the end of pList1. The current pointer is set to the current pointer of pList1. 
+// pList2 no longer exists after the operation; its head is available
+// for future operations.
+// void List_concat(List* pList1, List* pList2) {
+
+// }

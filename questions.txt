@@ -1,0 +1,5 @@
+- Currently in quite of few of my functions, I assert(size >= 0). Is this a bad functionality, or should I just return LIST_FAIL? The way I see it, the value is corrupted with no way to recover, so not only should this operation fail but the program should crash.
+
+- Is it okay that I'm not really storing list heads in the array? What I'm really storing is Lists (which of course contain the head, tail, current, size, etc.).
+
+- For List_concat, it says pList2 no longer exists after this operation, yet the head of pList2 is still available for use? Don't these contradict each other? How can the list no longer exist but I can use the head? Does it just mean that pList2 is empty after this operation? The main thing I'm wondering is do I need to remove pList2 from the array of heads/lists?.

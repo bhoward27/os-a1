@@ -141,5 +141,6 @@ void* List_fl(List*, Node*);
 void List_add_to_start(List*, Node*);
 void List_add_to_end(List*, Node*);
 void List_add_to_empty(List*, Node*);
+int List_pend(List*, void*, void (*) (List*, Node*));
 
 #endif
