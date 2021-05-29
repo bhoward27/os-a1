@@ -44,31 +44,14 @@ int List_add(List* pList, void* pItem) {
                 x->prev = pList->current;
                 x->next = pList->current->next;
                 pList->current->next = x;
-
                 pList->current = x;
                 if (x->prev == pList->tail) pList->tail = x;
                 break;
-
-            // Adds the new item to pList directly after the current item, and makes item the current item. 
-            
-            // If the current pointer is before the start of the pList, the item is added at the start.
             case LIST_OOB_START:
-                x->prev = NULL;
-                x->next = pList->head;
-                pList->head->prev = x;
-                pList->head = x;
-                pList->current = x;
-                pList->current_state = LIST_OOB_OK;
-                break;
-
-            // If the current pointer is beyond the end of the pList, the item is added at the end. 
+                List_add_to_start(pList, x);
+                break; 
             case LIST_OOB_END:
-                x->prev = pList->tail;
-                x->next = NULL;
-                pList->tail->next = x;
-                pList->tail = x;
-                pList->current = x;
-                pList->current_state = LIST_OOB_OK;
+                List_add_to_end(pList, x);
                 break;
 
             // These last two cases should be impossible (esp. when size > 0) so abort.
@@ -78,14 +61,7 @@ int List_add(List* pList, void* pItem) {
                 break;
         }
     }
-    else {
-        pList->head = x;
-        pList->tail = x;
-        x->next = NULL;
-        x->prev = NULL;
-        pList->current = x;
-        pList->current_state = LIST_OOB_OK;
-    }
+    else List_add_to_empty(pList, x);
     (pList->size)++;
     return LIST_SUCCESS;
 }
@@ -160,11 +136,13 @@ void* List_curr(List* pList) {
     return ptr->item;
 }
 
+// Untested
 void* List_first(List* pList) {
     assert(pList != NULL);
     return List_fl(pList, pList->head);
 }
 
+// Untested
 void* List_last(List* pList) {
     assert(pList != NULL);
     return List_fl(pList, pList->tail);
@@ -184,9 +162,106 @@ void* List_fl(List* pList, Node* fl) {
     return fl->item;
 }
 
-// Advances pList's current item by one, and returns a pointer to the new current item.
-// If this operation advances the current item beyond the end of the pList, a NULL pointer 
-// is returned and the current item is set to be beyond end of pList.
-// void* List_next(List* pList) {
-    
-// }
+
+void* List_next(List* pList) {
+    assert(pList != NULL);
+    enum ListOutOfBounds state = pList->current_state;
+    switch(state) {
+        case LIST_OOB_END:
+        case LIST_OOB_BAD:
+            return NULL;
+            break;
+        case LIST_OOB_START:
+            pList->current = pList->head;
+            // Assume the head is not null.
+            pList->current_state = LIST_OOB_OK;
+            return pList->current->item;
+            break;
+        case LIST_OOB_OK:
+            if (pList->current == pList->tail) {
+                pList->current = NULL;
+                pList->current_state = LIST_OOB_END;
+                return NULL;
+            }
+            pList->current = pList->current->next;
+            return pList->current->item;
+            break;
+        default:
+            return NULL;
+            break;
+    }
+}
+
+// Adds item to pList directly before the current item, and makes the new item the current one. 
+// If the current pointer is before the start of the pList, the item is added at the start. 
+// If the current pointer is beyond the end of the pList, the item is added at the end. 
+// Returns 0 on success, -1 on failure.
+int List_insert(List* pList, void* pItem) {
+    assert(pList != NULL);
+    int size = List_count(pList);
+
+    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
+    assert(size >= 0);
+
+    Node* x = new_node(nm_ptr);
+    if (x == NULL) return LIST_FAIL;
+    x->item = pItem;
+
+    if (size > 0) {
+        enum ListOutOfBounds state = pList->current_state;
+        switch(state) {
+            case LIST_OOB_OK:
+                x->next = pList->current;
+                x->prev = pList->current->prev;
+                pList->current->prev = x;
+                pList->current = x;
+                if (pList->current == pList->head) pList->head = x;
+                break;
+            case LIST_OOB_START:
+                List_add_to_start(pList, x);
+                break;  
+            case LIST_OOB_END:
+                List_add_to_end(pList, x);
+                break;
+
+            // These last two cases should be impossible (esp. when size > 0) so abort.
+            case LIST_OOB_BAD:
+            default:
+                return LIST_FAIL;
+                break;
+        }
+    }
+    else List_add_to_empty(pList, x);
+    (pList->size)++;
+    return LIST_SUCCESS;
+}
+
+// Helper function. Only to be called by List_add or List_insert.
+void List_add_to_end(List* pList, Node* x) {
+    x->prev = pList->tail;
+    x->next = NULL;
+    pList->tail->next = x;
+    pList->tail = x;
+    pList->current = x;
+    pList->current_state = LIST_OOB_OK;
+}
+
+// Helper function. Only to be called by List_add or List_insert.
+void List_add_to_start(List* pList, Node* x) {
+    x->prev = NULL;
+    x->next = pList->head;
+    pList->head->prev = x;
+    pList->head = x;
+    pList->current = x;
+    pList->current_state = LIST_OOB_OK;
+}
+
+// Helper function. Only to be called by List_add or List_insert.
+void List_add_to_empty(List* pList, Node* x) {
+    pList->head = x;
+    pList->tail = x;
+    x->next = NULL;
+    x->prev = NULL;
+    pList->current = x;
+    pList->current_state = LIST_OOB_OK;
+}

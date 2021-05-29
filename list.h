@@ -138,5 +138,8 @@ typedef bool (*COMPARATOR_FN)(void* pItem, void* pComparisonArg);
 void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg);
 
 void* List_fl(List*, Node*);
+void List_add_to_start(List*, Node*);
+void List_add_to_end(List*, Node*);
+void List_add_to_empty(List*, Node*);
 
 #endif

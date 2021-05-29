@@ -1,5 +1,5 @@
-CFLAGS = -Wall -std=c11 -o test.out
-OFLAGS = -Wall -std=c11 -g -c -Og
+CFLAGS = -Wall -Werror -std=c11 -o test.out
+OFLAGS = -Wall -Werror -std=c11 -g -c -Og
 
 all: test.out
 
