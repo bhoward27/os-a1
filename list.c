@@ -1,8 +1,15 @@
 #include "list.h"
 #include "node_manager.h"
 
-int num_heads = 0;
-List lists[LIST_MAX_NUM_HEADS];
+static int num_heads = 0;
+static List lists[LIST_MAX_NUM_HEADS];
+
+// Helper functions.
+static int List_pend(List*, void* pItem, void (*) (List*, Node*));
+static void List_add_to_empty(List*, Node*);
+static void List_add_to_start(List*, Node*);
+static void List_add_to_end(List*, Node*);
+static void* List_fl(List*, Node*);
 
 List* List_create() {
     if (nm_ptr == NULL) {
@@ -149,7 +156,7 @@ void* List_last(List* pList) {
 }
 
 // This helper function should only be called by List_first or List_last.
-void* List_fl(List* pList, Node* fl) {
+static void* List_fl(List* pList, Node* fl) {
     int size = List_count(pList);
     assert(size >= 0);
     if (size == 0) {
@@ -235,36 +242,6 @@ int List_insert(List* pList, void* pItem) {
     return LIST_SUCCESS;
 }
 
-// Helper function. Only to be called by List_add or List_insert.
-void List_add_to_end(List* pList, Node* x) {
-    x->prev = pList->tail;
-    x->next = NULL;
-    pList->tail->next = x;
-    pList->tail = x;
-    pList->current = x;
-    pList->current_state = LIST_OOB_OK;
-}
-
-// Helper function. Only to be called by List_add or List_insert.
-void List_add_to_start(List* pList, Node* x) {
-    x->prev = NULL;
-    x->next = pList->head;
-    pList->head->prev = x;
-    pList->head = x;
-    pList->current = x;
-    pList->current_state = LIST_OOB_OK;
-}
-
-// Helper function. Only to be called by List_add or List_insert.
-void List_add_to_empty(List* pList, Node* x) {
-    pList->head = x;
-    pList->tail = x;
-    x->next = NULL;
-    x->prev = NULL;
-    pList->current = x;
-    pList->current_state = LIST_OOB_OK;
-}
-
 // Adds item to the end of pList, and makes the new item the current one. 
 // Returns 0 on success, -1 on failure.
 int List_append(List* pList, void* pItem) {
@@ -278,7 +255,7 @@ int List_prepend(List* pList, void* pItem) {
 }
 
 // Helper function for List_prepend and List_append.
-int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
+static int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
     assert(pList != NULL);
     int size = List_count(pList);
 
@@ -295,9 +272,35 @@ int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
     return LIST_SUCCESS;
 }
 
-// Deal with following before implementing List_concat():
-// • Your .c file may include additional “private” (internally linked static) functions. The .h file must not expose any “private” functions. (i.e., your .h file must only expose those functions listed in the provided list.h).
-// • Any global variables must be static (internally linked).
+// Helper function.
+static void List_add_to_empty(List* pList, Node* x) {
+    pList->head = x;
+    pList->tail = x;
+    x->next = NULL;
+    x->prev = NULL;
+    pList->current = x;
+    pList->current_state = LIST_OOB_OK;
+}
+
+// Helper function.
+static void List_add_to_start(List* pList, Node* x) {
+    x->prev = NULL;
+    x->next = pList->head;
+    pList->head->prev = x;
+    pList->head = x;
+    pList->current = x;
+    pList->current_state = LIST_OOB_OK;
+}
+
+// Helper function.
+static void List_add_to_end(List* pList, Node* x) {
+    x->prev = pList->tail;
+    x->next = NULL;
+    pList->tail->next = x;
+    pList->tail = x;
+    pList->current = x;
+    pList->current_state = LIST_OOB_OK;
+}
 
 // Adds pList2 to the end of pList1. The current pointer is set to the current pointer of pList1. 
 // pList2 no longer exists after the operation; its head is available

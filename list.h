@@ -45,8 +45,6 @@ struct List_s {
     int size;
     enum ListOutOfBounds current_state;
 };
-extern List lists[LIST_MAX_NUM_HEADS];
-extern int num_heads;
 
 // General Error Handling:
 // Client code is assumed never to call these functions with a NULL List pointer, or 
@@ -136,11 +134,5 @@ void* List_trim(List* pList);
 // the first node in the list (if any).
 typedef bool (*COMPARATOR_FN)(void* pItem, void* pComparisonArg);
 void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg);
-
-void* List_fl(List*, Node*);
-void List_add_to_start(List*, Node*);
-void List_add_to_end(List*, Node*);
-void List_add_to_empty(List*, Node*);
-int List_pend(List*, void*, void (*) (List*, Node*));
 
 #endif
