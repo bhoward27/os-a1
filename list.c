@@ -280,6 +280,24 @@ static void List_add_to_end(List* pList, Node* x) {
     pList->current_state = LIST_OOB_OK;
 }
 
+static int assert_n_get_size(List* pList) {
+    int size = List_count(pList);
+
+    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
+    assert(size >= 0);
+    return size;
+}
+
+static void* size_1_to_0(List* pList, Node* temp) {
+    pList->head = NULL;
+    pList->tail = NULL;
+    pList->current = NULL;
+    pList->current_state = LIST_OOB_BAD;
+    delete_node(nm_ptr, temp);
+    pList->size = 0;
+    return temp->item;
+}  
+
 // Return last item and take it out of pList. Make the new last item the current one.
 // Return NULL if pList is initially empty.
 void* List_trim(List* pList) {
@@ -299,37 +317,49 @@ void* List_trim(List* pList) {
     return old_tail->item;
 }
 
-static int assert_n_get_size(List* pList) {
-    int size = List_count(pList);
+void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) {
+    assert(pList != NULL);
 
-    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
-    assert(size >= 0);
-    return size;
+    Node* cursor;
+    enum ListOutOfBounds state = pList->current_state;
+    switch (state) {
+        case LIST_OOB_OK:
+            cursor = pList->current;
+            break;
+        case LIST_OOB_START: // We assume here that state != LIST_OOB_START whenever size == 0.
+            cursor = pList->head;
+            break;
+        case LIST_OOB_END:
+        case LIST_OOB_BAD:
+        default:
+            return NULL;
+            break;
+    }
+    while (cursor && !pComparator(cursor->item, pComparisonArg)) cursor = cursor->next;
+
+    // If a match was found.
+    if (cursor) {
+        pList->current = cursor;
+        pList->current_state = LIST_OOB_OK;
+        return cursor->item;
+    }
+    pList->current = NULL;
+    pList->current_state = LIST_OOB_END;
+    return NULL;
 }
 
-static void* size_1_to_0(List* pList, Node* temp) {
-    pList->head = NULL;
-    pList->tail = NULL;
-    pList->current = NULL;
-    pList->current_state = LIST_OOB_BAD;
-    delete_node(nm_ptr, temp);
-    pList->size = 0;
-    return temp->item;
-}  
+// Delete pList. pItemFreeFn is a pointer to a routine that frees an item. 
+// It should be invoked (within List_free) as: (*pItemFreeFn)(itemToBeFreedFromNode);
+// pList and all its nodes no longer exists after the operation; its head and nodes are 
+// available for future operations.
+// typedef void (*FREE_FN)(void* pItem);
+// void List_free(List* pList, FREE_FN pItemFreeFn) {
 
-// Search pList, starting at the current item, until the end is reached or a match is found. 
-// In this context, a match is determined by the comparator parameter. This parameter is a
-// pointer to a routine that takes as its first argument an item pointer, and as its second 
-// argument pComparisonArg. Comparator returns 0 if the item and comparisonArg don't match, 
-// or 1 if they do. Exactly what constitutes a match is up to the implementor of comparator. 
-// 
-// If a match is found, the current pointer is left at the matched item and the pointer to 
-// that item is returned. If no match is found, the current pointer is left beyond the end of 
-// the list and a NULL pointer is returned.
-// 
-// If the current pointer is before the start of the pList, then start searching from
-// the first node in the list (if any).
-// typedef bool (*COMPARATOR_FN)(void* pItem, void* pComparisonArg);
-// void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) {
+// }
+
+// Adds pList2 to the end of pList1. The current pointer is set to the current pointer of pList1. 
+// pList2 no longer exists after the operation; its head is available
+// for future operations.
+// void List_concat(List* pList1, List* pList2) {
 
 // }
