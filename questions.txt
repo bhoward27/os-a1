@@ -2,4 +2,6 @@
 
 - Is it okay that I'm not really storing list heads in the array? What I'm really storing is Lists (which of course contain the head, tail, current, size, etc.).
 
-- For List_concat, it says pList2 no longer exists after this operation, yet the head of pList2 is still available for use? Don't these contradict each other? How can the list no longer exist but I can use the head? Does it just mean that pList2 is empty after this operation? The main thing I'm wondering is do I need to remove pList2 from the array of heads/lists?.
+- For List_concat, it says pList2 no longer exists after this operation, yet the head of pList2 is still available for use? Don't these contradict each other? How can the list no longer exist but I can use the head? Does it just mean that pList2 is empty after this operation? The main thing I'm wondering is do I need to remove pList2 from the array of heads/lists?. I think so. If that's the case, I'm kind of at a loss for what to do. It seems very complicated.
+
+-For similar reasons as for List_concat(), List_free() also confuses me.

@@ -10,6 +10,8 @@ static void List_add_to_empty(List*, Node*);
 static void List_add_to_start(List*, Node*);
 static void List_add_to_end(List*, Node*);
 static void* List_fl(List*, Node*);
+static int assert_n_get_size(List*);
+static void* size_1_to_0(List*, Node*);
 
 List* List_create() {
     if (nm_ptr == NULL) {
@@ -34,11 +36,7 @@ int List_count(List* pList) {
 }
 
 int List_add(List* pList, void* pItem) {
-    assert(pList != NULL);
-    int size = List_count(pList);
-
-    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
-    assert(size >= 0);
+    int size = assert_n_get_size(pList);
 
     Node* x = new_node(nm_ptr);
     if (x == NULL) return LIST_FAIL;
@@ -74,25 +72,14 @@ int List_add(List* pList, void* pItem) {
 }
 
 void* List_remove(List* pList) {
-    assert(pList != NULL);
-    int size = List_count(pList);
-    assert(size >= 0);
-
+    int size = assert_n_get_size(pList);
     if (size == 0) return NULL;
     Node* temp = pList->current;
     if (temp == NULL) {
         return NULL;
     }
 
-    if (size == 1) {
-        pList->head = NULL;
-        pList->tail = NULL;
-        pList->current = NULL;
-        pList->current_state = LIST_OOB_BAD;
-        delete_node(nm_ptr, temp);
-        pList->size = 0;
-        return temp->item;
-    }
+    if (size == 1) return size_1_to_0(pList, temp);
 
     if (temp == pList->tail) {
         pList->tail = temp->prev;
@@ -157,8 +144,7 @@ void* List_last(List* pList) {
 
 // This helper function should only be called by List_first or List_last.
 static void* List_fl(List* pList, Node* fl) {
-    int size = List_count(pList);
-    assert(size >= 0);
+    int size = assert_n_get_size(pList);
     if (size == 0) {
         // No need to set current to NULL, as, if the list is empty, this SHOULD already be the case.
         return NULL;
@@ -203,11 +189,7 @@ void* List_next(List* pList) {
 // If the current pointer is beyond the end of the pList, the item is added at the end. 
 // Returns 0 on success, -1 on failure.
 int List_insert(List* pList, void* pItem) {
-    assert(pList != NULL);
-    int size = List_count(pList);
-
-    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
-    assert(size >= 0);
+    int size = assert_n_get_size(pList);
 
     Node* x = new_node(nm_ptr);
     if (x == NULL) return LIST_FAIL;
@@ -256,11 +238,7 @@ int List_prepend(List* pList, void* pItem) {
 
 // Helper function for List_prepend and List_append.
 static int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
-    assert(pList != NULL);
-    int size = List_count(pList);
-
-    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
-    assert(size >= 0);
+    int size = assert_n_get_size(pList);
 
     Node* x = new_node(nm_ptr);
     if (x == NULL) return LIST_FAIL;
@@ -302,9 +280,56 @@ static void List_add_to_end(List* pList, Node* x) {
     pList->current_state = LIST_OOB_OK;
 }
 
-// Adds pList2 to the end of pList1. The current pointer is set to the current pointer of pList1. 
-// pList2 no longer exists after the operation; its head is available
-// for future operations.
-// void List_concat(List* pList1, List* pList2) {
+// Return last item and take it out of pList. Make the new last item the current one.
+// Return NULL if pList is initially empty.
+void* List_trim(List* pList) {
+    int size = assert_n_get_size(pList);
+    if (size == 0) return NULL;
+
+    Node* old_tail = pList->tail;
+    if (size == 1) return size_1_to_0(pList, old_tail);
+
+    pList->tail = old_tail->prev;
+    pList->tail->next = NULL;
+    pList->current_state = LIST_OOB_OK;  
+    pList->current = pList->tail;
+
+    delete_node(nm_ptr, old_tail);
+    (pList->size)--;
+    return old_tail->item;
+}
+
+static int assert_n_get_size(List* pList) {
+    int size = List_count(pList);
+
+    // If size < 0, the value has been corrupted, perhaps due to overflow, so abort.
+    assert(size >= 0);
+    return size;
+}
+
+static void* size_1_to_0(List* pList, Node* temp) {
+    pList->head = NULL;
+    pList->tail = NULL;
+    pList->current = NULL;
+    pList->current_state = LIST_OOB_BAD;
+    delete_node(nm_ptr, temp);
+    pList->size = 0;
+    return temp->item;
+}  
+
+// Search pList, starting at the current item, until the end is reached or a match is found. 
+// In this context, a match is determined by the comparator parameter. This parameter is a
+// pointer to a routine that takes as its first argument an item pointer, and as its second 
+// argument pComparisonArg. Comparator returns 0 if the item and comparisonArg don't match, 
+// or 1 if they do. Exactly what constitutes a match is up to the implementor of comparator. 
+// 
+// If a match is found, the current pointer is left at the matched item and the pointer to 
+// that item is returned. If no match is found, the current pointer is left beyond the end of 
+// the list and a NULL pointer is returned.
+// 
+// If the current pointer is before the start of the pList, then start searching from
+// the first node in the list (if any).
+// typedef bool (*COMPARATOR_FN)(void* pItem, void* pComparisonArg);
+// void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) {
 
 // }
