@@ -5,12 +5,12 @@ static int num_heads = 0;
 static List lists[LIST_MAX_NUM_HEADS];
 
 // Helper functions.
-static int List_pend(List*, void* pItem, void (*) (List*, Node*));
-static void List_add_to_empty(List*, Node*);
-static void List_add_to_start(List*, Node*);
-static void List_add_to_end(List*, Node*);
-static void* List_fl(List*, Node*);
-static int assert_n_get_size(List*);
+static int   pend(List*, void* pItem, void (*) (List*, Node*));
+static void  add_to_empty(List*, Node*);
+static void  add_to_start(List*, Node*);
+static void  add_to_end(List*, Node*);
+static void* first_last(List*, Node*);
+static int   assert_n_get_size(List*);
 static void* size_1_to_0(List*, Node*);
 
 List* List_create() {
@@ -53,10 +53,10 @@ int List_add(List* pList, void* pItem) {
                 if (x->prev == pList->tail) pList->tail = x;
                 break;
             case LIST_OOB_START:
-                List_add_to_start(pList, x);
+                add_to_start(pList, x);
                 break; 
             case LIST_OOB_END:
-                List_add_to_end(pList, x);
+                add_to_end(pList, x);
                 break;
 
             // These last two cases should be impossible (esp. when size > 0) so abort.
@@ -66,7 +66,7 @@ int List_add(List* pList, void* pItem) {
                 break;
         }
     }
-    else List_add_to_empty(pList, x);
+    else add_to_empty(pList, x);
     (pList->size)++;
     return LIST_SUCCESS;
 }
@@ -133,26 +133,26 @@ void* List_curr(List* pList) {
 // Untested
 void* List_first(List* pList) {
     assert(pList != NULL);
-    return List_fl(pList, pList->head);
+    return first_last(pList, pList->head);
 }
 
 // Untested
 void* List_last(List* pList) {
     assert(pList != NULL);
-    return List_fl(pList, pList->tail);
+    return first_last(pList, pList->tail);
 }
 
 // This helper function should only be called by List_first or List_last.
-static void* List_fl(List* pList, Node* fl) {
+static void* first_last(List* pList, Node* first_last) {
     int size = assert_n_get_size(pList);
     if (size == 0) {
         // No need to set current to NULL, as, if the list is empty, this SHOULD already be the case.
         return NULL;
     }
-    // We assume here that fl can't be NULL if size > 0.
-    pList->current = fl;
+    // We assume here that first_last can't be NULL if size > 0.
+    pList->current = first_last;
     pList->current_state = LIST_OOB_OK;
-    return fl->item;
+    return first_last->item;
 }
 
 void* List_next(List* pList) {
@@ -206,10 +206,10 @@ int List_insert(List* pList, void* pItem) {
                 if (pList->current == pList->head) pList->head = x;
                 break;
             case LIST_OOB_START:
-                List_add_to_start(pList, x);
+                add_to_start(pList, x);
                 break;  
             case LIST_OOB_END:
-                List_add_to_end(pList, x);
+                add_to_end(pList, x);
                 break;
 
             // These last two cases should be impossible (esp. when size > 0) so abort.
@@ -219,7 +219,7 @@ int List_insert(List* pList, void* pItem) {
                 break;
         }
     }
-    else List_add_to_empty(pList, x);
+    else add_to_empty(pList, x);
     (pList->size)++;
     return LIST_SUCCESS;
 }
@@ -227,17 +227,17 @@ int List_insert(List* pList, void* pItem) {
 // Adds item to the end of pList, and makes the new item the current one. 
 // Returns 0 on success, -1 on failure.
 int List_append(List* pList, void* pItem) {
-    return List_pend(pList, pItem, List_add_to_end);
+    return pend(pList, pItem, add_to_end);
 }
 
 // Adds item to the front of pList, and makes the new item the current one. 
 // Returns 0 on success, -1 on failure.
 int List_prepend(List* pList, void* pItem) {
-    return List_pend(pList, pItem, List_add_to_start);
+    return pend(pList, pItem, add_to_start);
 }
 
 // Helper function for List_prepend and List_append.
-static int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
+static int pend(List* pList, void* pItem, void (*not_empty_func) (List*, Node*)) {
     int size = assert_n_get_size(pList);
 
     Node* x = new_node(nm_ptr);
@@ -245,13 +245,13 @@ static int List_pend(List* pList, void* pItem, void (*not_empty_func) (List*, No
     x->item = pItem;
 
     if (size > 0) not_empty_func(pList, x);
-    else List_add_to_empty(pList, x);
+    else add_to_empty(pList, x);
     (pList->size)++;
     return LIST_SUCCESS;
 }
 
 // Helper function.
-static void List_add_to_empty(List* pList, Node* x) {
+static void add_to_empty(List* pList, Node* x) {
     pList->head = x;
     pList->tail = x;
     x->next = NULL;
@@ -261,7 +261,7 @@ static void List_add_to_empty(List* pList, Node* x) {
 }
 
 // Helper function.
-static void List_add_to_start(List* pList, Node* x) {
+static void add_to_start(List* pList, Node* x) {
     x->prev = NULL;
     x->next = pList->head;
     pList->head->prev = x;
@@ -271,7 +271,7 @@ static void List_add_to_start(List* pList, Node* x) {
 }
 
 // Helper function.
-static void List_add_to_end(List* pList, Node* x) {
+static void add_to_end(List* pList, Node* x) {
     x->prev = pList->tail;
     x->next = NULL;
     pList->tail->next = x;

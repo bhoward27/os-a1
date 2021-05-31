@@ -11,7 +11,7 @@ void test_add(List*, void*, char);
 void* test_remove(List*, char);
 void* test_prev(List*, char);
 void test_tail(List*);
-void test_curr(List*);
+void test_curr(List*, char);
 void print_list(List*, char);
 void print_free_list(Node_manager*);
 void print_all_nodes(Node_manager*);
@@ -28,6 +28,11 @@ void test_first(List*, char);
 void test_last(List*, char);
 void test_insert(List* l, void* item, char list_name);
 void test_add_thing(List*, void*, char, int (*) (List*, void*), char*);
+void* test_trim(List*, char);
+void test_prepend(List*, void*, char);
+void test_search(List*, void*, char);
+bool cmp_ch(void*, void*);
+void* test_remove_thing(List*, char, void* (*) (List*), char*);
 
 char items[NUM_ITEMS];
 
@@ -236,15 +241,25 @@ void test_add(List* l, void* item, char list_name) {
 }
 
 void* test_remove(List* list, char list_name) {
-    char* item = (char*) List_remove(list);
+    return test_remove_thing(list, list_name, List_remove, "List_remove");
+}
+
+// Helper function.
+void* test_remove_thing(List* l, char list_name,
+                        void* (*remove_func) (List*), char* remove_func_name) {
+    char* item = (char*) remove_func(l);
     if (item == NULL) {
-        printf("List_remove(%c, item) = NULL\n", list_name);
+        printf("%s(%c, item) = NULL\n", remove_func_name, list_name);
         return NULL;
     }
     else {
-        printf("List_remove(%c, item) = %c\n", list_name, *item);
+        printf("%s(%c, item) = %c\n", remove_func_name, list_name, *item);
         return (void*) item;
     }
+}
+
+void* test_trim(List* list, char list_name) {
+    return test_remove_thing(list, list_name, List_trim, "List_trim");
 }
 
 void* test_prev(List* l, char list_name) {
@@ -268,18 +283,20 @@ void test_tail(List* l) {
     }
 }
 
-void test_curr(List* l) {
+void test_curr(List* l, char list_name) {
     if (l->current == NULL) {
-        printf("l->current = NULL\nl->current_state = %d\n", l->current_state);
+        printf("%c->current = NULL\n%c->current_state = %d\n", list_name, list_name, 
+                l->current_state);
     }
     else {
-        printf("l->current = %p\nl->current_state = %d\n", (void*) l->current, l->current_state);
+        printf("%c->current = %p\n%c->current_state = %d\n", list_name, (void*) l->current, 
+                list_name, l->current_state);
         void* item = List_curr(l);
         if (item == NULL) {
-            printf("l->current->item = INACCESSIBLE or NULL\n");
+            printf("%c->current->item = INACCESSIBLE or NULL\n", list_name);
         }
         else {
-            printf("l->current->item = %c\n", *((char*) List_curr(l)));
+            printf("%c->current->item = %c\n", list_name, *((char*) List_curr(l)));
         }
     }
 }
@@ -377,8 +394,9 @@ void test_append(List* l, void* item, char list_name) {
    test_add_thing(l, item, list_name, List_append, "List_append");
 }
 
+// Helper function.
 void test_add_thing(List* l, void* item, char list_name,
-                        int (*add_func) (List* l, void* item), char* add_func_name) {
+                        int (*add_func) (List*, void*), char* add_func_name) {
     char* x = (char*) item;
     if (x != NULL) {
         printf("%s(%c, *item = %c) = %d\n", add_func_name, list_name, *x, add_func(l, item));
@@ -386,4 +404,41 @@ void test_add_thing(List* l, void* item, char list_name,
     else {
         printf("%s(%c, item = NULL) = %d\n", add_func_name, list_name, add_func(l, item));
     }
+}
+
+void test_prepend(List* l, void* item, char list_name) {
+    test_add_thing(l, item, list_name, List_prepend, "List_prepend");
+}
+
+// Search pList, starting at the current item, until the end is reached or a match is found. 
+// In this context, a match is determined by the comparator parameter. This parameter is a
+// pointer to a routine that takes as its first argument an item pointer, and as its second 
+// argument pComparisonArg. Comparator returns 0 if the item and comparisonArg don't match, 
+// or 1 if they do. Exactly what constitutes a match is up to the implementor of comparator. 
+// 
+// If a match is found, the current pointer is left at the matched item and the pointer to 
+// that item is returned. If no match is found, the current pointer is left beyond the end of 
+// the list and a NULL pointer is returned.
+// 
+// If the current pointer is before the start of the pList, then start searching from
+// the first node in the list (if any).
+void test_search(List* list, void* cmp_arg, char list_name) {
+    char arg = *((char*) cmp_arg);
+    test_curr(list, list_name);
+    printf("Searching %c for '%c'...\n", list_name, arg);
+    char* item = (char*) List_search(list, cmp_ch, cmp_arg);
+    if (item == NULL) {
+        printf("'%c' not found.\n", arg);
+    }
+    else {
+        printf("Found '%c' at address %p\n", *item, (void*) item);
+    }
+    test_curr(list, list_name);
+}
+
+// My comparator.
+bool cmp_ch(void* item, void* cmp_arg) {
+    char i = *((char*) item);
+    char arg = *((char*) cmp_arg);
+    return i == arg;
 }
