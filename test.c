@@ -24,6 +24,10 @@ void testerino(const int, List**, char*, const int);
 void testerino_p(const int, List***, char*, const int);
 void test_create(List**, char);
 void test_createrino(const int, List***, char*);
+void test_first(List*, char);
+void test_last(List*, char);
+void test_insert(List* l, void* item, char list_name);
+void test_add_thing(List*, void*, char, int (*) (List*, void*), char*);
 
 char items[NUM_ITEMS];
 
@@ -228,13 +232,7 @@ int test_count(List* list, char list_name) {
 }
 
 void test_add(List* l, void* item, char list_name) {
-    char* x = (char*) item;
-    if (x != NULL) {
-        printf("List_add(%c, *item = %c) = %d\n", list_name, *x, List_add(l, item));
-    }
-    else {
-        printf("List_add(%c, item = NULL) = %d\n", list_name, List_add(l, item));
-    }
+    test_add_thing(l, item, list_name, List_add, "List_add");
 }
 
 void* test_remove(List* list, char list_name) {
@@ -321,10 +319,71 @@ void print_list(List *l, char name) {
         printf("INACCESSIBLE\n");
 }
 
-void print_free_list(Node_manager *nm) {
+// Returns a pointer to the first item in pList and makes the first item the current item.
+// Returns NULL and sets current item to NULL if list is empty.
+void test_first(List* list, char list_name) {
+    assert(list != NULL);
+    printf("%c->head = %p\n", list_name, (void*) list->head);
+    printf("%c->current (initial) = %p\n", list_name, (void*) list->current);
     
+    void* item = List_first(list);
+    if (item == NULL) {
+        printf("List_first(%c) = INACCESSIBLE or NULL\n", list_name);
+    }
+    else {
+        printf("List_first(%c) = %c\n", *((char*) item), list_name);
+    }
+    printf("%c->current (new) = %p\n", list_name, (void*) list->current);
 }
 
-void print_all_nodes(Node_manager *nm) {
+// Returns a pointer to the last item in pList and makes the last item the current item.
+// Returns NULL and sets current item to NULL if list is empty.
+void test_last(List* list, char list_name) {
+    assert(list != NULL);
+    printf("%c->tail = %p\n", list_name, (void*) list->tail);
+    printf("%c->current (initial) = %p\n", list_name, (void*) list->current);
+    
+    void* item = List_last(list);
+    if (item == NULL) {
+        printf("List_last(%c) = INACCESSIBLE or NULL\n", list_name);
+    }
+    else {
+        printf("List_last(%c) = %c\n", *((char*) item), list_name);
+    }
+    printf("%c->current (new) = %p\n", list_name, (void*) list->current);
+}
 
+// Advances pList's current item by one, and returns a pointer to the new current item.
+// If this operation advances the current item beyond the end of the pList, a NULL pointer 
+// is returned and the current item is set to be beyond end of pList.
+void* test_next(List* list, char list_name) {
+    char* item = (char*) List_next(list);
+    if (item == NULL) {
+        printf("List_next(%c) = NULL\n", list_name);
+    }
+    else {
+        printf("List_next(%c) = %c\n", list_name, *item);
+    }
+    return item;
+}
+
+void test_insert(List* l, void* item, char list_name) {
+    test_add_thing(l, item, list_name, List_insert, "List_insert");
+}
+
+// Adds item to the end of pList, and makes the new item the current one. 
+// Returns 0 on success, -1 on failure.
+void test_append(List* l, void* item, char list_name) {
+   test_add_thing(l, item, list_name, List_append, "List_append");
+}
+
+void test_add_thing(List* l, void* item, char list_name,
+                        int (*add_func) (List* l, void* item), char* add_func_name) {
+    char* x = (char*) item;
+    if (x != NULL) {
+        printf("%s(%c, *item = %c) = %d\n", add_func_name, list_name, *x, add_func(l, item));
+    }
+    else {
+        printf("%s(%c, item = NULL) = %d\n", add_func_name, list_name, add_func(l, item));
+    }
 }
