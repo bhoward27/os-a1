@@ -16,16 +16,18 @@ void print_list(List*, char);
 void print_free_list(Node_manager*);
 void print_all_nodes(Node_manager*);
 void old_test();
-void rand_alloc(const int, List**, char*, const int);
-void rand_alloc_p(const int, List***, char*, const int);
+void rand_alloc(const int, List**, char*, const int, void (*) (List*, void*, char));
+void rand_alloc_p(const int, List***, char*, const int, void (*) (List*, void*, char));
 void rand_dealloc(const int, List**, char*, const int);
 void rand_dealloc_p(const int, List***, char*, const int);
 void testerino(const int, List**, char*, const int);
 void testerino_p(const int, List***, char*, const int);
 void test_create(List**, char);
 void test_createrino(const int, List***, char*);
-void test_first(List*, char);
-void test_last(List*, char);
+
+// New functions.
+void test_first(List*, char); // Works.
+void test_last(List*, char); // Works.
 void test_insert(List* l, void* item, char list_name);
 void test_add_thing(List*, void*, char, int (*) (List*, void*), char*);
 void* test_trim(List*, char);
@@ -33,6 +35,10 @@ void test_prepend(List*, void*, char);
 void test_search(List*, void*, char);
 bool cmp_ch(void*, void*);
 void* test_remove_thing(List*, char, void* (*) (List*), char*);
+void rand_add(const int, List**, char*, const int);
+void rand_add_p(const int, List***, char*, const int);
+void rand_insert(const int, List**, char*, const int);
+void rand_insert_p(const int, List***, char*, const int);
 
 char items[NUM_ITEMS];
 
@@ -40,7 +46,7 @@ int main() {
     // Create the array of items which will be referenced by nodes.
     // chars with ASCII code 33 to 126 are readable.
     for (int i = 0; i < NUM_ITEMS; i++) {
-        items[i] = (char) i + 33;
+        items[i] = (char) (i + 33);
     }
 
     // Declare 12 lists.
@@ -69,7 +75,7 @@ int main() {
     const int NUM_ELEMS1 = 90;
     
     srand(time(0));
-    rand_alloc_p(NUM_ELEMS1, lists1, list_names1, NUM_LISTS1);
+    rand_add_p(NUM_ELEMS1, lists1, list_names1, NUM_LISTS1);
     testerino_p(NUM_LISTS1, lists1, list_names1, NUM_ELEMS1);
 
     // Try to add more than 100 nodes collectively to all the lists.
@@ -80,7 +86,7 @@ int main() {
 
     // Add 11 elements total, allocating randomly.
     const int NUM_ELEMS2 = 11;
-    rand_alloc_p(NUM_ELEMS2, lists2, list_names2, NUM_LISTS2);
+    rand_add_p(NUM_ELEMS2, lists2, list_names2, NUM_LISTS2);
     testerino_p(NUM_LISTS2, lists2, list_names2, NUM_ELEMS2);
 
     // Try to create 7 more lists 
@@ -106,7 +112,7 @@ int main() {
     List* lists5[] = {a, b, c, d, e, f, g, h, i, j};
     char list_names5[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'};
 
-    rand_alloc(NUM_ELEMS5, lists5, list_names5, NUM_LISTS5);
+    rand_add(NUM_ELEMS5, lists5, list_names5, NUM_LISTS5);
     testerino(NUM_LISTS5, lists5, list_names5, NUM_ELEMS5 + 20);
 
     const int NUM_ELEMS6 = 27;
@@ -127,6 +133,8 @@ int main() {
     test_count(y, y_name);
     printf("\n");
 
+    // Need to test insertion somewhere.
+
     return 0;
 }
 
@@ -146,17 +154,35 @@ void test_createrino(const int NUM_LISTS, List*** lists, char* list_names) {
     }
 }
 
-void rand_alloc(const int NUM_ELEMS, List** lists, char* list_names, const int NUM_LISTS) {
+void rand_add(const int NUM_ELEMS, List** lists, char* list_names, const int NUM_LISTS) {
+    rand_alloc(NUM_ELEMS, lists, list_names, NUM_LISTS, test_add);
+}
+
+void rand_add_p(const int NUM_ELEMS, List*** lists, char* list_names, const int NUM_LISTS) {
+    rand_alloc_p(NUM_ELEMS, lists, list_names, NUM_LISTS, test_add);
+}
+
+void rand_insert(const int NUM_ELEMS, List** lists, char* list_names, const int NUM_LISTS) {
+    rand_alloc(NUM_ELEMS, lists, list_names, NUM_LISTS, test_insert);
+}
+
+void rand_insert_p(const int NUM_ELEMS, List*** lists, char* list_names, const int NUM_LISTS) {
+    rand_alloc_p(NUM_ELEMS, lists, list_names, NUM_LISTS, test_insert);
+}
+
+void rand_alloc(const int NUM_ELEMS, List** lists, char* list_names, const int NUM_LISTS,
+                    void (*alloc_func) (List*, void*, char)) {
     for (int i = 0; i < NUM_ELEMS; ++i) {
         int choice = rand() % NUM_LISTS;
-        test_add(lists[choice], (void*) (items + i), list_names[choice]);
+        alloc_func(lists[choice], (void*) (items + i), list_names[choice]);
     }
 }
 
-void rand_alloc_p(const int NUM_ELEMS, List*** lists, char* list_names, const int NUM_LISTS) {
+void rand_alloc_p(const int NUM_ELEMS, List*** lists, char* list_names, const int NUM_LISTS,
+                    void (*alloc_func) (List*, void*, char)) {
     for (int i = 0; i < NUM_ELEMS; ++i) {
         int choice = rand() % NUM_LISTS;
-        test_add(*(lists[choice]), (void*) (items + i), list_names[choice]);
+        alloc_func(*(lists[choice]), (void*) (items + i), list_names[choice]);
     }
 }
 
@@ -302,6 +328,11 @@ void test_curr(List* l, char list_name) {
 }
 
 void print_list(List *l, char name) {
+    // printf("\n");
+    // test_first(l, name); // Remove later.
+    // printf("\n");
+    // test_last(l, name); // Remove later.
+    // printf("\n");
     assert(l != NULL);
     if (l->size == 0) {
         printf("**********  %c  **********\n", name);
@@ -348,13 +379,15 @@ void test_first(List* list, char list_name) {
         printf("List_first(%c) = INACCESSIBLE or NULL\n", list_name);
     }
     else {
-        printf("List_first(%c) = %c\n", *((char*) item), list_name);
+        printf("List_first(%c) = %c\n", list_name, *((char*) item));
     }
     printf("%c->current (new) = %p\n", list_name, (void*) list->current);
 }
 
 // Returns a pointer to the last item in pList and makes the last item the current item.
 // Returns NULL and sets current item to NULL if list is empty.
+
+// Could do for a refactor here as test_first is almost identical to this function.
 void test_last(List* list, char list_name) {
     assert(list != NULL);
     printf("%c->tail = %p\n", list_name, (void*) list->tail);
@@ -365,7 +398,7 @@ void test_last(List* list, char list_name) {
         printf("List_last(%c) = INACCESSIBLE or NULL\n", list_name);
     }
     else {
-        printf("List_last(%c) = %c\n", *((char*) item), list_name);
+        printf("List_last(%c) = %c\n", list_name, *((char*) item));
     }
     printf("%c->current (new) = %p\n", list_name, (void*) list->current);
 }
