@@ -320,6 +320,7 @@ void* List_trim(List* pList) {
 
 void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) {
     assert(pList != NULL);
+    assert(pComparator != NULL);
 
     Node* cursor;
     enum ListOutOfBounds state = pList->current_state;
@@ -351,19 +352,30 @@ void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) 
 
 // Delete pList. pItemFreeFn is a pointer to a routine that frees an item. 
 // It should be invoked (within List_free) as: (*pItemFreeFn)(itemToBeFreedFromNode);
-// pList and all its nodes no longer exists after the operation; its head and nodes are 
+// pList and all its nodes no longer exist after the operation; its head and nodes are 
 // available for future operations.
 /*
     After doing a List_free(), # of heads has decreased by 1, so a List_create() afterwords should
-    always work. This part is why I need to rewrite how List_create() works and whatnot.
+    always work.
 
     FREE_FN is a user-defined function. For example, it could be free() from the C standard library.
     FREE_FN is called on each node to free its corresponding item.
 */
 // typedef void (*FREE_FN)(void* pItem);
-// void List_free(List* pList, FREE_FN pItemFreeFn) {
+void List_free(List* pList, FREE_FN pItemFreeFn) {
+    assert(pList != NULL);
+    assert(pItemFreeFn != NULL);
 
-// }
+    Node* cursor = pList->head;
+    while (cursor) {
+        Node* next = cursor->next;
+        pItemFreeFn(cursor->item);
+        delete_node(nm_ptr, cursor);
+        (pList->size)--;
+        cursor = next;
+    }
+    delete_list(lm_ptr, pList);
+}
 
 // Adds pList2 to the end of pList1. The current pointer is set to the current pointer of pList1. 
 // pList2 no longer exists after the operation; its head is available
@@ -372,6 +384,23 @@ void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) 
     After doing a List_free(), # of heads has decreased by 1, so a List_create() afterwords should
     always work.
 */
-// void List_concat(List* pList1, List* pList2) {
+void List_concat(List* pList1, List* pList2) {
+    int size1 = assert_n_get_size(pList1);
+    int size2 = assert_n_get_size(pList2);
+    if (size2 == 0) {
+        delete_list(lm_ptr, pList2);
+        return;
+    }
 
-// }
+    // pList2 must have size >= 1, and, therefore, pList2->head should not be NULL.
+    if (size1 == 0) {
+        // Modifies pList1->current, but I think it's the right thing to do here.
+        add_to_empty(pList1, pList2->head);
+        delete_list(lm_ptr, pList2);
+        return;
+    }
+    
+    // size1 and size2 >= 1. What do?
+
+
+}
