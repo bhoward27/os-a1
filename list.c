@@ -387,20 +387,19 @@ void List_free(List* pList, FREE_FN pItemFreeFn) {
 void List_concat(List* pList1, List* pList2) {
     int size1 = assert_n_get_size(pList1);
     int size2 = assert_n_get_size(pList2);
+
     if (size2 == 0) {
         delete_list(lm_ptr, pList2);
         return;
     }
 
-    // pList2 must have size >= 1, and, therefore, pList2->head should not be NULL.
     if (size1 == 0) {
-        // Modifies pList1->current, but I think it's the right thing to do here.
-        add_to_empty(pList1, pList2->head);
-        delete_list(lm_ptr, pList2);
-        return;
+        pList1->head = pList2->head;
+        pList1->tail = pList2->tail;
     }
-    
-    // size1 and size2 >= 1. What do?
-
-
+    else {
+        pList1->tail->next = pList2->head;
+        pList1->tail = pList2->tail;
+    }
+    delete_list(lm_ptr, pList2);
 }
