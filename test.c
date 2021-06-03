@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "list.h"
-#include "node_manager.h"
 #include <stdbool.h>
 #include <time.h>
 #define NUM_ITEMS 126
@@ -13,8 +12,6 @@ void* test_prev(List*, char);
 void test_tail(List*);
 void test_curr(List*, char);
 void print_list(List*, char);
-void print_free_list(Node_manager*);
-void print_all_nodes(Node_manager*);
 void old_test();
 void rand_alloc(const int, List**, char*, const int, void (*) (List*, void*, char));
 void rand_alloc_p(const int, List***, char*, const int, void (*) (List*, void*, char));

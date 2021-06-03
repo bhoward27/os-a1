@@ -3,9 +3,7 @@
 Node_manager node_manager;
 Node_manager* nm_ptr = NULL;
 
-// Perhaps this function is poorly name, but this does not free anything, rather, it initalizes what
-// I'm calling the free_list. The free_list is the list of free/unused nodes.
-void init_free_list(Node_manager* node_manager) {
+void init_nodes(Node_manager* node_manager) {
     assert(node_manager != NULL);
     assert(node_manager->nodes != NULL);
 

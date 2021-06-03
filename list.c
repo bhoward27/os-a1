@@ -1,8 +1,6 @@
 #include "list.h"
 #include "node_manager.h"
-
-static int num_heads = 0;
-static List lists[LIST_MAX_NUM_HEADS];
+#include "list_manager.h"
 
 // Helper functions.
 static int   pend(List*, void* pItem, void (*) (List*, Node*));
@@ -15,19 +13,22 @@ static void* size_1_to_0(List*, Node*);
 
 List* List_create() {
     if (nm_ptr == NULL) {
-        init_free_list(&node_manager);
+        init_nodes(&node_manager);
         nm_ptr = &node_manager;
     }
-    if (num_heads >= LIST_MAX_NUM_HEADS) return NULL;
-    List* new_list = lists + num_heads;
+    if (lm_ptr == NULL) {
+        init_lists(&list_manager);
+        lm_ptr = &list_manager;
+    }
+    List* l = new_list(lm_ptr);
+    if (l == NULL) return NULL;
 
-    new_list->head = NULL;
-    new_list->tail = NULL;
-    new_list->current = NULL;
-    new_list->current_state = LIST_OOB_BAD;
-    new_list->size = 0;
-    num_heads++;
-    return new_list;
+    l->head = NULL;
+    l->tail = NULL;
+    l->current = NULL;
+    l->current_state = LIST_OOB_BAD;
+    l->size = 0;
+    return l;
 }
 
 int List_count(List* pList) {
@@ -352,6 +353,13 @@ void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) 
 // It should be invoked (within List_free) as: (*pItemFreeFn)(itemToBeFreedFromNode);
 // pList and all its nodes no longer exists after the operation; its head and nodes are 
 // available for future operations.
+/*
+    After doing a List_free(), # of heads has decreased by 1, so a List_create() afterwords should
+    always work. This part is why I need to rewrite how List_create() works and whatnot.
+
+    FREE_FN is a user-defined function. For example, it could be free() from the C standard library.
+    FREE_FN is called on each node to free its corresponding item.
+*/
 // typedef void (*FREE_FN)(void* pItem);
 // void List_free(List* pList, FREE_FN pItemFreeFn) {
 
@@ -360,6 +368,10 @@ void* List_search(List* pList, COMPARATOR_FN pComparator, void* pComparisonArg) 
 // Adds pList2 to the end of pList1. The current pointer is set to the current pointer of pList1. 
 // pList2 no longer exists after the operation; its head is available
 // for future operations.
+/*
+    After doing a List_free(), # of heads has decreased by 1, so a List_create() afterwords should
+    always work.
+*/
 // void List_concat(List* pList1, List* pList2) {
 
 // }

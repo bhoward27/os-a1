@@ -44,6 +44,7 @@ struct List_s {
     Node* tail;
     int size;
     enum ListOutOfBounds current_state;
+    List* next_list;
 };
 
 // General Error Handling:

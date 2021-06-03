@@ -8,10 +8,12 @@ struct Node_manager_s {
     Node* free_head;
 };
 
+// I guess this is a no-no since it says to make globals static,
+// but since list.c requires these variables, I can't make it static.
 extern Node_manager node_manager;
 extern Node_manager* nm_ptr;
 
-void init_free_list(Node_manager*);
+void init_nodes(Node_manager*);
 void delete_node(Node_manager*, Node*);
 Node* new_node(Node_manager*);
 
