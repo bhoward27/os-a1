@@ -403,8 +403,10 @@ void List_concat(List* pList1, List* pList2) {
         pList1->tail = pList2->tail;
     }
     else {
+        pList2->head->prev = pList1->tail;
         pList1->tail->next = pList2->head;
         pList1->tail = pList2->tail;
     }
+    pList1->size = size1 + size2;
     delete_list(lm_ptr, pList2);
 }

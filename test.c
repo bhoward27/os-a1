@@ -16,7 +16,9 @@ static char* LCI = "List_insert()";
 static char* LA = "List_append()";
 static char* LPRP = "List_prepend()";
 static char* LR = "List_remove()";
-
+static char* LCON = "List_concat()";
+static char* LS = "List_search()";
+static char* LFR = "List_free()";
 
 bool  cmp_ch(void*, void*);
 bool test_first(List*);
@@ -31,14 +33,18 @@ bool test_remove(List*, bool);
 bool test_insert(List*, char*, int);
 bool test_append(List*, char*, int);
 bool test_prepend(List*, char*, int);
-
+bool test_concat(List*, List*);
+bool test_free(List**);
+bool test_search(List*, void*, bool);
+bool test_concat(List*, List*);
+void free_fn(void*);
 
 void print_running(char* test_name);
 void print_result(char*, bool);
 void print_list(List*, char);
 
 int main() {
-    char* items = (char*) malloc(sizeof(char) * NUM_ITEMS);
+    char items[NUM_ITEMS];
     assert(items != NULL);
     // Create the array of items which will be referenced by nodes.
     // chars with ASCII code 33 to 126 are readable.
@@ -111,7 +117,80 @@ int main() {
     print_list(a, 'a');
     printf("\n");
 
+    List* b;
+    print_running(LC);
+    print_result(LC, test_create(&b));
+    print_list(b, 'b');
+    printf("\n");
+    
+    print_running("List_add() 4 times");
+    print_result("(1) List_add()", test_add(b, items + 10, LIST_SUCCESS));
+    print_result("(2) List_add()", test_add(b, items + 7, LIST_SUCCESS));
+    print_result("(3) List_add()", test_add(b, items + 8, LIST_SUCCESS));
+    print_result("(4) List_add()", test_add(b, items + 9, LIST_SUCCESS));
+    print_list(b, 'b');
+    printf("\n");
+
+    print_running(LCON);
+    print_result(LCON, test_concat(a, b));
+    print_list(a, 'a');
+
+    print_running(LF);
+    print_result(LF, test_first(a));
+    print_list(a, 'a');
+    printf("\n");
+
+    void* arg = (void*) (items + 5);
+    print_running(LS);
+    print_result(LS, test_search(a, arg, false));
+    printf("\n");
+
+    printf("Creating maximum amount of lists...\n");
+    while (List_create());
+    printf("Done.\n");
+    print_running(LFR);
+    print_result(LFR, test_free(&a));
+    print_list(a, 'a'); //should be empty.
+    printf("\n");
+
     return 0;
+}
+
+void free_fn(void* item) {
+    return;
+}
+
+bool test_free(List** l) {
+    if (List_create() == NULL) {
+        List_free(*l, free_fn);
+        *l = List_create();
+        if (*l == NULL) return false;
+    }
+    return true;
+}
+
+bool test_search(List* l, void* arg, bool expect_null) {
+    void* result = List_search(l, cmp_ch, arg);
+    if (expect_null) {
+        if (result) return false;
+        return l->current_state == LIST_OOB_END;
+    } 
+   
+    if (result != arg) return false;
+    if (l->current->item != arg) return false;
+    return true;
+}
+
+bool test_concat(List* u, List* v) {
+    int u_size = List_count(u);
+    int v_size = List_count(v);
+    Node* v_tail = v->tail;
+    Node* u_current = u->current;
+    List_concat(u, v);
+    if (u_current != u->current) return false;
+    if (u_size + v_size != List_count(u)) return false;
+    if (v_tail != u->tail) return false;
+    return true;
 }
 
 bool test_curr(List* l) {
