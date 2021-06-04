@@ -86,6 +86,10 @@ void* List_remove(List* pList) {
         pList->tail = temp->prev;
         pList->tail->next = NULL;
         pList->current_state = LIST_OOB_END;
+    }
+    if (temp == pList->head) {
+        temp->next->prev = NULL;
+        pList->head = temp->next;
     }   
     pList->current = temp->next;
 
@@ -202,6 +206,7 @@ int List_insert(List* pList, void* pItem) {
             case LIST_OOB_OK:
                 x->next = pList->current;
                 x->prev = pList->current->prev;
+                pList->current->prev->next = x;
                 pList->current->prev = x;
                 pList->current = x;
                 if (pList->current == pList->head) pList->head = x;
