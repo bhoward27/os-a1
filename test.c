@@ -19,6 +19,7 @@ static char* LR = "List_remove()";
 static char* LCON = "List_concat()";
 static char* LS = "List_search()";
 static char* LFR = "List_free()";
+static char* LT = "List_trim()";
 
 bool  cmp_ch(void*, void*);
 bool test_first(List*);
@@ -37,6 +38,7 @@ bool test_concat(List*, List*);
 bool test_free(List**);
 bool test_search(List*, void*, bool);
 bool test_concat(List*, List*);
+bool test_trim(List*, bool);
 void free_fn(void*);
 
 void print_running(char* test_name);
@@ -145,6 +147,11 @@ int main() {
     print_result(LS, test_search(a, arg, false));
     printf("\n");
 
+    print_running(LT);
+    print_result(LT, test_trim(a, false));
+    print_list(a, 'a');
+    printf("\n");
+
     printf("Creating maximum amount of lists...\n");
     while (List_create());
     printf("Done.\n");
@@ -154,6 +161,20 @@ int main() {
     printf("\n");
 
     return 0;
+}
+
+bool test_trim(List* l, bool expect_null) {
+    int size = List_count(l);
+    Node* last = l->tail;
+    void* result = List_trim(l);
+    if (expect_null) {
+        return result == NULL;
+    }
+    if (result != last->item) return false;
+    if (size <= List_count(l)) return false;
+    if (last->prev != l->tail) return false;
+    if (l->tail != l->current) return false;
+    return true;
 }
 
 void free_fn(void* item) {
